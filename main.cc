@@ -13,15 +13,6 @@
 #include <fstream>
 #include <string>
 
-// ROOT
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TMultiGraph.h>
-#include <TCanvas.h>
-#include <TLegend.h>
-
-
-
 int main()
 {
   // Timer
@@ -69,39 +60,44 @@ int main()
 
   // Allocate a "Chi2CostFunction" instance to be fed to ceres for
   // minimisation.
-  //ceres::CostFunction *chi2cf = new Chi2CostFunction{np, Predictions, Derivatives, Data};
 
-//ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4> *chi2cf = new ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4>( new my_AutoDiffCostFunctor(np, Data));
-ceres::DynamicNumericDiffCostFunction<NumericCostFunction> *chi2cf = new ceres::DynamicNumericDiffCostFunction<NumericCostFunction>(new NumericCostFunction(np, Data));
-//ceres::CostFunction *chi2cf = new AnalyticCostFunction(np, Data);
+  //===Analytic
+  ceres::CostFunction *chi2cf = new AnalyticCostFunction(np, Data);
 
-for (int i = 0; i < np; i++)
-  chi2cf->AddParameterBlock(1);
+  //===Automatic
+  //ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4> *chi2cf = new ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4>( new my_AutoDiffCostFunctor(np, Data));
+  
+  //===Numeric
+  //ceres::DynamicNumericDiffCostFunction<NumericCostFunction> *chi2cf = new ceres::DynamicNumericDiffCostFunction<NumericCostFunction>(new NumericCostFunction(np, Data));
 
-chi2cf->SetNumResiduals(Data.size());
+  //===For Automatic and Numeric 
+  //for (int i = 0; i < np; i++)
+  //  chi2cf->AddParameterBlock(1);
 
-// Allocate "Problem" instance
-ceres::Problem problem;
-problem.AddResidualBlock(chi2cf, NULL, initPars);
-// ============================================================
+  //chi2cf->SetNumResiduals(Data.size());
 
-// ============================================================
-// Run the solver with some options.
-// ============================================================
-// Compute initial chi2
-double chi2 = 0;
-std::vector<std::vector<double>> Predictions;
-for (int i = 0; i < n; i++)
-{
-  std::vector<double> x;
-  x.push_back(std::get<0>(Data[i]));
-  std::vector<double>
-      v = nn->Evaluate(x);
-  Predictions.push_back(v);
-  //std::cout << "Predictions[id][0] = " << Predictions[i][0]<<std::endl;
-  //std::cout << "std::get<0>(Data[id]) = " << std::get<0>(Data[i]) << std::endl;
-  //std::cout << "std::get<1>(Data[id]) = " << std::get<1>(Data[i]) << std::endl;
-  //std::cout << "std::get<2>(Data[id]) = " << std::get<2>(Data[i]) << std::endl;
+  // Allocate "Problem" instance
+  ceres::Problem problem;
+  problem.AddResidualBlock(chi2cf, NULL, initPars);
+  // ============================================================
+
+  // ============================================================
+  // Run the solver with some options.
+  // ============================================================
+  // Compute initial chi2
+  double chi2 = 0;
+  std::vector<std::vector<double>> Predictions;
+  for (int i = 0; i < n; i++)
+  {
+    std::vector<double> x;
+    x.push_back(std::get<0>(Data[i]));
+    std::vector<double>
+        v = nn->Evaluate(x);
+    Predictions.push_back(v);
+    //std::cout << "Predictions[id][0] = " << Predictions[i][0]<<std::endl;
+    //std::cout << "std::get<0>(Data[id]) = " << std::get<0>(Data[i]) << std::endl;
+    //std::cout << "std::get<1>(Data[id]) = " << std::get<1>(Data[i]) << std::endl;
+    //std::cout << "std::get<2>(Data[id]) = " << std::get<2>(Data[i]) << std::endl;
   }
   //exit(1);
   for (int id = 0; id < n; id++)
@@ -142,43 +138,6 @@ for (int i = 0; i < n; i++)
   std::cout << "\n";
   t.stop();
   // ============================================================
-
-  // Plots results (taken from Rabah's code).
-  
-  TGraphErrors *exp_graph = new TGraphErrors();
-  TGraph *NN_graph = new TGraph();
-  //for (int i = 0; i < (int) Data.size(); i++)
-  for (int i = 0; i < n; i++)
-  {
-    const double x = std::get<0>(Data[i]);
-    const double y = std::get<1>(Data[i]);
-    const double dy = std::get<2>(Data[i]);
-    const double yn = Predictions[i][0];
-    exp_graph->SetPoint(i, x, y);
-    exp_graph->SetPointError(i, 0, dy);
-    NN_graph->SetPoint(i, x, yn);
-  }
-  exp_graph->SetLineColor(1);
-  exp_graph->SetMarkerStyle(20);
-  NN_graph->SetMarkerColor(2);
-  NN_graph->SetMarkerStyle(20);
-
-  TLegend *leg = new TLegend(0.7, 0.89, 0.89, 0.75);
-  leg->SetFillColor(0);
-  leg->AddEntry(exp_graph, "Exp", "lp");
-  leg->AddEntry(NN_graph, "NN", "lp");
-  leg->AddEntry((TObject *)0, ("#chi^{2} = " + std::to_string(chi2)).c_str(), "");
-
-  TMultiGraph *mg = new TMultiGraph();
-  TCanvas *c = new TCanvas();
-  mg->Add(NN_graph, "AP");
-  //mg->Add(exp_graph, "AP");
-  mg->SetTitle("Title");
-  mg->Draw("AP");
-  leg->Draw("SAME");
-
-  c->SaveAs("output.pdf");
-  system("open output.pdf");
 
   delete nn;
   return 0;
