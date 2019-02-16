@@ -1,3 +1,3 @@
-analytic:		time[1.218678 s]	iterations[1000] 	chi2/ndat[7.28241e-09]
-automatic:	    time[1.435668 s]	iterations[1000]	chi2/ndat[7.28241e-09]
+analytic:   time[1.218678 s]	iterations[1000] 	chi2/ndat[7.28241e-09]
+automatic:  time[1.435668 s]	iterations[1000]	chi2/ndat[7.28241e-09]
 numeric:		time[7.904501 s]	iterations[1000] 	chi2/ndat[7.28893e-09]
