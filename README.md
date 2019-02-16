@@ -1,2 +1,2 @@
-# CRS_NN
-Neural Network implementation with ceres-solver
+# NNAGD
+Neural Network library for Analytical Gradient Descent 
