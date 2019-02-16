@@ -1,7 +1,10 @@
-#include "tFeedForwardNN.h"
+#include "FeedForwardNN.h"
 #include "Timer.h"
-//#include "Chi2CostFunction.h"
-#include "my_AutoDiffCostFunctor.h"
+
+#include "AnalyticCostFunction.h"
+#include "AutoDiffCostFunction.h"
+#include "NumericCostFunction.h"
+
 
 // Standard libs
 #include <iostream>
@@ -28,7 +31,7 @@ int main()
   // Initialise NN to be fitted to data.
   // ============================================================
   //FeedForwardNN* nn = new FeedForwardNN{{2, 10, 3}, time(NULL)};
-  FeedForwardNN<double> *nn = new FeedForwardNN<double>({1, 5, 1}, time(NULL));
+  FeedForwardNN<double> *nn = new FeedForwardNN<double>({1, 5, 1}, 1);
 
   // Generate pseudo data
   //std::vector<std::pair<double, double>> Data = GenerateData(Preds, 0.005, 0.01);
@@ -51,7 +54,7 @@ int main()
     double sd = 1e-2 * (rand() % 100) + 0.001;
     std::get<0>(tuple) = x;
     std::get<1>(tuple) = y;
-    std::get<2>(tuple) = 0.1;
+    std::get<2>(tuple) = sd;
     Data.push_back(tuple);
   }
   
@@ -68,10 +71,9 @@ int main()
   // minimisation.
   //ceres::CostFunction *chi2cf = new Chi2CostFunction{np, Predictions, Derivatives, Data};
 
-ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4> *chi2cf = new ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4>( new my_AutoDiffCostFunctor(np, Data));
-
-  //TODO: Add the numeric cost function.
-  //ceres::DynamicNumericDiffCostFunction<NumericCostFunctor> *chi2cf = new ceres::DynamicNumericDiffCostFunction<NumericCostFunctor>(new NumericCostFunctor(np + npp, Predictions, expdata));
+//ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4> *chi2cf = new ceres::DynamicAutoDiffCostFunction<my_AutoDiffCostFunctor, 4>( new my_AutoDiffCostFunctor(np, Data));
+ceres::DynamicNumericDiffCostFunction<NumericCostFunction> *chi2cf = new ceres::DynamicNumericDiffCostFunction<NumericCostFunction>(new NumericCostFunction(np, Data));
+//ceres::CostFunction *chi2cf = new AnalyticCostFunction(np, Data);
 
 for (int i = 0; i < np; i++)
   chi2cf->AddParameterBlock(1);

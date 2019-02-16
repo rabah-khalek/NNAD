@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "tUtilities.h"
-#include "tMatrix.h"
+#include "Utilities.h"
+#include "Matrix.h"
 
 #include <vector>
 #include <functional>

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include "tUtilities.h"
+#include "Utilities.h"
 #include <random>
 #include <stdlib.h>
 
