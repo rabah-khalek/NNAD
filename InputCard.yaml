@@ -1,0 +1,3 @@
+Seed: 1
+NNarchitecture: [1,5,1]
+Derivatives: Numeric #Analytic #Automatic #Numeric 

@@ -17,8 +17,12 @@ class AnalyticCostFunction : public ceres::CostFunction
 {
   public:
     AnalyticCostFunction(int const &Np,
-                         vectdata const &Data) : _Np(Np),
-                                                 _Data(Data)
+                         vectdata const &Data,
+                         std::vector<int> &NNarchitecture,
+                         int const &Seed) : _Np(Np),
+                                            _Data(Data),
+                                            _NNarchitecture(NNarchitecture),
+                                            _Seed(Seed)
     {
         
 		// Set number of residuals (i.e. number of data points)
@@ -37,7 +41,7 @@ class AnalyticCostFunction : public ceres::CostFunction
     {
         const int nd = _Data.size();
         //TODO: pass the info from main
-        FeedForwardNN<double> *nn = new FeedForwardNN<double>({1, 5, 1}, 5);
+        FeedForwardNN<double> *nn = new FeedForwardNN<double>(_NNarchitecture, _Seed);
         std::vector<double> pars;
         for (int i = 0; i < _Np; i++)
             pars.push_back(parameters[i][0]);
@@ -82,4 +86,6 @@ class AnalyticCostFunction : public ceres::CostFunction
   private:
     int _Np;
     vectdata _Data;
+    std::vector<int> _NNarchitecture;
+    int _Seed;
 };

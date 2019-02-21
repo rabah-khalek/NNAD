@@ -15,13 +15,17 @@ typedef std::vector<Datapoint> vectdata;
 
 struct NumericCostFunction {
   NumericCostFunction(int const &Np,
-                           vectdata const &Data) : _Np(Np),
-                                                   _Data(Data)
+                      vectdata const &Data,
+                      std::vector<int> const &NNarchitecture,
+                      int const &Seed) : _Np(Np),
+                                         _Data(Data),
+                                         _NNarchitecture(NNarchitecture),
+                                         _Seed(Seed)
     {}
 
   bool operator()(double const* const* parameters, double* residuals) const {
         //TODO: pass the info from main
-        FeedForwardNN<double> *nn = new FeedForwardNN<double>({1, 5, 1}, 5);
+        FeedForwardNN<double> *nn = new FeedForwardNN<double>(_NNarchitecture, _Seed);
         std::vector<double> pars;
         for(int i=0; i<_Np;i++)
         {
@@ -45,4 +49,6 @@ struct NumericCostFunction {
 }
     int _Np;
     vectdata _Data;
+    std::vector<int> _NNarchitecture;
+    int _Seed;
 };

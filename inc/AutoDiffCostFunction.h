@@ -12,12 +12,16 @@
 typedef std::tuple<double,double,double> Datapoint;
 typedef std::vector<Datapoint> vectdata;
 
-class my_AutoDiffCostFunctor
+class AutoDiffCostFunction
 {
   public:
-    my_AutoDiffCostFunctor(int const &Np,
-                           vectdata const &Data) : _Np(Np),
-                                                   _Data(Data)
+    AutoDiffCostFunction(int const &Np,
+                         vectdata const &Data,
+                         std::vector<int> const &NNarchitecture,
+                         int const &Seed) : _Np(Np),
+                                            _Data(Data),
+                                            _NNarchitecture(NNarchitecture),
+                                            _Seed(Seed)
     {
         /*
 		// Set number of residuals (i.e. number of data points)
@@ -34,7 +38,7 @@ class my_AutoDiffCostFunctor
     bool operator()(T const *const *parameters, T *residuals) const
     {
         //TODO: pass the info from main
-        FeedForwardNN<T> *nn = new FeedForwardNN<T>({1, 5, 1}, 5);
+        FeedForwardNN<T> *nn = new FeedForwardNN<T>(_NNarchitecture, _Seed);
         std::vector<T> pars;
         for(int i=0; i<_Np;i++)
         {
@@ -60,5 +64,7 @@ class my_AutoDiffCostFunctor
   private:
     int _Np;
     vectdata _Data;
+    std::vector<int> _NNarchitecture;
+    int _Seed;
 };
 
