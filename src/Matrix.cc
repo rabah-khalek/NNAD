@@ -1,31 +1,32 @@
 #include "Matrix.h"
 
-  template<class T>
-  Matrix<T>::Matrix(int const &Lines, int const &Columns, int const &RandomSeed) : _Lines(Lines),
-                                                                             _Columns(Columns),
-                                                                             _Matrix(_Lines * _Columns)
+
+template <class T>
+Matrix<T>::Matrix(int const &Lines, int const &Columns, int const &RandomSeed) : _Lines(Lines),
+                                                                                 _Columns(Columns),
+                                                                                 _Matrix(_Lines * _Columns)
+{
+  // Initialise random number generator.
+  srand(RandomSeed);
+  // Fill in the matrix with random numbers distributed in [-1:1].
+  //for (int i = 0; i < _Lines * _Columns; i++)
+  //  _Matrix[i] = 2e-2 * (rand() % 100) - 1;
+
+  std::default_random_engine generator(RandomSeed);
+  double sd = sqrt(2. / Columns); //He-et-al Initialization [see:https://towardsdatascience.com/random-initialization-for-neural-networks-a-thing-of-the-past-bfcdd806bf9e]
+  std::normal_distribution<double> dist(0.0, sd);
+
+  for (int i = 0; i < _Lines * _Columns; i++)
   {
-    // Initialise random number generator.
-    srand(RandomSeed);
-    // Fill in the matrix with random numbers distributed in [-1:1].
-    //for (int i = 0; i < _Lines * _Columns; i++)
-    //  _Matrix[i] = 2e-2 * (rand() % 100) - 1;
+    double init = dist(generator);
 
-    std::default_random_engine generator(RandomSeed);
-    double sd = sqrt(2. / Columns); //He-et-al Initialization [see:https://towardsdatascience.com/random-initialization-for-neural-networks-a-thing-of-the-past-bfcdd806bf9e]
-    std::normal_distribution<double> dist(0.0, sd);
-
-    for (int i = 0; i < _Lines * _Columns; i++)
+    while (init > 2 * sd || init < -2 * sd)
     {
-      double init = dist(generator);
-
-      while (init > 2 * sd || init < -2 * sd)
-      {
-        init = dist(generator);
-      }
-
-      _Matrix[i] = T(init);
+      init = dist(generator);
     }
+
+    _Matrix[i] = T(init);
+  }
   }
 
   template <class T>
@@ -197,3 +198,8 @@
 
     return result;
   }
+
+  // template fixed types
+  template class Matrix<double>; //<! for numeric and analytic
+  //! make a global const for the stride? (N = 4)
+  template class Matrix<ceres::Jet<double, 4>>; //<! for automatic

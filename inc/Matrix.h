@@ -3,9 +3,10 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include "Utilities.h"
 #include <random>
 #include <stdlib.h>
+
+#include "Utilities.h"
 #include "ceres/jet.h"
 
 template <class T>
@@ -51,8 +52,3 @@ private:
   int _Columns;
   std::vector<T> _Matrix;
 };
-
-// template fixed types
-template class Matrix<double>;                          //<! for numeric and analytic
-//! make a global const for the stride? (N = 4)
-template class Matrix<ceres::Jet<double, 4> >; //<! for automatic
