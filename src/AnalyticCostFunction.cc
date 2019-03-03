@@ -12,6 +12,7 @@ AnalyticCostFunction::AnalyticCostFunction(int const &Np,
                                                               _NNarchitecture(NNarchitecture),
                                                               _Seed(Seed)
 {
+    _nn = new FeedForwardNN<double>(_NNarchitecture, _Seed);
 
     // Set number of residuals (i.e. number of data points)
     set_num_residuals(_Data.size());
@@ -27,13 +28,12 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
                                             double **jacobians) const
 {
     const int nd = _Data.size();
-    //TODO: pass the info from main
-    FeedForwardNN<double> *nn = new FeedForwardNN<double>(_NNarchitecture, _Seed);
+
     std::vector<double> pars;
     for (int i = 0; i < _Np; i++)
         pars.push_back(parameters[i][0]);
 
-    nn->SetParameters(pars);
+    _nn->SetParameters(pars);
 
     // Residuals and Jacobian
     if (jacobians != NULL)
@@ -43,7 +43,7 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
             std::vector<double> input;
             double x = std::get<0>(_Data[id]);
             input.push_back(x);
-            const std::vector<double> vd = nn->Derive(input);
+            const std::vector<double> vd = _nn->Derive(input);
 
             residuals[id] = (vd[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
             for (int ip = 0; ip < _Np; ip++)
@@ -53,19 +53,15 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
     // Only residuals
     else
     {
-        // Set parameters of the NN
-
         for (int id = 0; id < nd; id++)
         {
             std::vector<double> input;
             double x = std::get<0>(_Data[id]);
             input.push_back(x);
-            const std::vector<double> v = nn->Evaluate(input);
+            const std::vector<double> v = _nn->Evaluate(input);
             residuals[id] = (v[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
         }
-
-        delete nn;
-        return true;
     }
     return true;
 }
+AnalyticCostFunction::~AnalyticCostFunction(){delete _nn;};

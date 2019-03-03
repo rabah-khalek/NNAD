@@ -21,13 +21,14 @@ class AnalyticCostFunction : public ceres::CostFunction
                          std::vector<int> &,
                          int const &);
 
-    virtual ~AnalyticCostFunction() {}
+    virtual ~AnalyticCostFunction();
 
     virtual bool Evaluate(double const *const *,
                           double *,
                           double **) const;
 
   private:
+    FeedForwardNN<double> *_nn;
     int _Np;
     vectdata _Data;
     std::vector<int> _NNarchitecture;
