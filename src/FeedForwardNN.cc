@@ -3,6 +3,7 @@
 //
 
 #include "FeedForwardNN.h"
+#include "Globals.h"
 
 // Typedef for the coordinates of the NN parameters
 typedef std::tuple<bool, int, int, int> coordinates;
@@ -296,5 +297,4 @@ FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
 
    // template fixed types
    template class FeedForwardNN<double>; //<! for numeric and analytic
-   //! make a global const for the stride? (N = 4)
-   template class FeedForwardNN<ceres::Jet<double, 4>>; //<! for automatic
+   template class FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic

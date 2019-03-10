@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "Globals.h"
 
 template<typename T> T Sigmoid(T const& x)
 {
@@ -14,5 +15,5 @@ template <typename T> T dSigmoid(T const &x)
 template double Sigmoid<double>(double const&);
 template double dSigmoid<double>(double const &);
 
-template ceres::Jet<double, 4> Sigmoid<ceres::Jet<double, 4>>(ceres::Jet<double, 4> const &);
-template ceres::Jet<double, 4> dSigmoid<ceres::Jet<double, 4>>(ceres::Jet<double, 4> const &);
+template ceres::Jet<double, GLOBALS::kStride> Sigmoid<ceres::Jet<double, GLOBALS::kStride>>(ceres::Jet<double, GLOBALS::kStride> const &);
+template ceres::Jet<double, GLOBALS::kStride> dSigmoid<ceres::Jet<double, GLOBALS::kStride>>(ceres::Jet<double, GLOBALS::kStride> const &);
