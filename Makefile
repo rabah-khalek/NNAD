@@ -1,16 +1,25 @@
-INCLUDES = -I$(PWD)/inc -I/usr/local/include/eigen3
-CXX = clang++
+# additional libraries to be included
+LDFLAGS = -lceres -lglog -lyaml-cpp
+INCLUDES += -I/Cellar/yaml-cpp/0.6.2/include/  -I$(PWD)/inc -I/usr/local/include/eigen3
 
-# Assumes that the script is in MyScript.C
-# and it must contain a main() function
-all: main
+CXX = clang++ 
 
-main: 
+TARGET ?= main
+SRC_DIRS ?= ./src
 
-% : %.cc #for each target X, if X.c exists and is newer than X (or X doesn't exist), run the command below
-	$(CXX) -O3 -g -Wall -stdlib=libc++ -std=c++11 -L/usr/local/lib/ -lceres -lglog -lyaml-cpp $(INCLUDES) $? -o NNAGD
+SRCS := $(shell find $(SRC_DIRS) -name '*.cc') $(TARGET).cc
+OBJS := $(addsuffix .o,$(basename $(SRCS)))
+DEPS := $(OBJS:.o=.d)
 
-	rm -r NNAGD.dSYM
-	@echo "======= make is done ======="
+INC_FLAGS := $(INCLUDES)
+
+CXXFLAGS ?= -Wall -O3 -std=c++11 $(INC_FLAGS) -MMD -MP
+
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
+
+.PHONY: clean
 clean:
-	rm src/*o NNAGD
+	$(RM) $(TARGET) $(OBJS) $(DEPS)
+
+-include $(DEPS)
