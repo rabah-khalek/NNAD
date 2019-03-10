@@ -1,5 +1,5 @@
 #include "Matrix.h"
-
+#include "Globals.h"
 
 template <class T>
 Matrix<T>::Matrix(int const &Lines, int const &Columns, int const &RandomSeed) : _Lines(Lines),
@@ -201,5 +201,4 @@ Matrix<T>::Matrix(int const &Lines, int const &Columns, int const &RandomSeed) :
 
   // template fixed types
   template class Matrix<double>; //<! for numeric and analytic
-  //! make a global const for the stride? (N = 4)
-  template class Matrix<ceres::Jet<double, 4>>; //<! for automatic
+  template class Matrix<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic

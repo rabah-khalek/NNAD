@@ -3,6 +3,7 @@
 //
 
 #include "AutoDiffCostFunction.h"
+#include "Globals.h"
 
 AutoDiffCostFunction::AutoDiffCostFunction(int const &Np,
                                          vectdata const &Data,
@@ -39,4 +40,4 @@ bool AutoDiffCostFunction::operator()(T const *const *parameters, T *residuals) 
 
 // template fixed types
 template bool AutoDiffCostFunction::operator()(double const *const *parameters, double *residuals) const;
-template bool AutoDiffCostFunction::operator()(ceres::Jet<double, 4> const *const *parameters, ceres::Jet<double, 4> *residuals) const;
+template bool AutoDiffCostFunction::operator()(ceres::Jet<double, GLOBALS::kStride> const *const *parameters, ceres::Jet<double, GLOBALS::kStride> *residuals) const;

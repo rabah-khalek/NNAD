@@ -4,6 +4,7 @@
 #include "AnalyticCostFunction.h"
 #include "AutoDiffCostFunction.h"
 #include "NumericCostFunction.h"
+#include "Globals.h"
 
 // YAML
 #include "yaml-cpp/yaml.h"
@@ -14,6 +15,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+
 
 using namespace std;
 
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
   // Allocate a "Chi2CostFunction" instance to be fed to ceres for
   // minimisation based on the choice from InputCard.yaml
   ceres::CostFunction *analytic_chi2cf = nullptr;
-  ceres::DynamicAutoDiffCostFunction<AutoDiffCostFunction, 4> *automatic_chi2cf = nullptr;
+  ceres::DynamicAutoDiffCostFunction<AutoDiffCostFunction, GLOBALS::kStride> *automatic_chi2cf = nullptr;
   ceres::DynamicNumericDiffCostFunction<NumericCostFunction> *numeric_chi2cf = nullptr;
 
   string DerivativesChoice = InputCard["Derivatives"].as<string>();
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
 
   //Automatic
   case 1:
-    automatic_chi2cf = new ceres::DynamicAutoDiffCostFunction<AutoDiffCostFunction, 4>(new AutoDiffCostFunction(np, Data, NNarchitecture, Seed));
+    automatic_chi2cf = new ceres::DynamicAutoDiffCostFunction<AutoDiffCostFunction, GLOBALS::kStride>(new AutoDiffCostFunction(np, Data, NNarchitecture, Seed));
     delete analytic_chi2cf;
     delete numeric_chi2cf;
     for (int i = 0; i < np; i++)
