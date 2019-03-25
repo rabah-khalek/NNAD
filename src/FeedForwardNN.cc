@@ -41,7 +41,7 @@ FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
                                                             _LinearOutput(LinearOutput)
 {
   // Initialise random number generator
-  srand(RandomSeed);
+  //srand(RandomSeed);
 
   // Number of layers
   const int nl = (int)_Arch.size();
