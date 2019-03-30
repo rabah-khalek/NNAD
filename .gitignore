@@ -1,0 +1,6 @@
+src/*.d
+src/*.o
+*.d
+main
+*.d
+.DS_Store
