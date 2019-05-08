@@ -28,8 +28,7 @@ typedef std::tuple<bool, int, int, int> coordinates;
  * "omega_{ij}", for all accessible values of "j".
  */
 
-
-  // Constructors
+// Constructors
 template <class T>
 FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
                                 int const &RandomSeed,
@@ -40,11 +39,17 @@ FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
                                                             _dActFun(dActFun),
                                                             _LinearOutput(LinearOutput)
 {
-  // Initialise random number generator
-  //srand(RandomSeed);
-
   // Number of layers
   const int nl = (int)_Arch.size();
+
+  // Store sub seeds
+  srand(RandomSeed);
+  std::vector<int> sub_seeds;
+  for (int l = 1; l < nl; l++)
+  {
+    sub_seeds.push_back(rand());
+    sub_seeds.push_back(rand());
+  }
 
   // Number of parameters
   _Np = 0;
@@ -55,10 +60,11 @@ FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
   // leftmost layer. Biases are treated as one-column matrices
   // associated to each layer (but the input one) with as many rows as
   // nodes.
+  int iseed = 0;
   for (int l = 1; l < nl; l++)
   {
-    _Links.insert({l, Matrix<T>{_Arch[l], _Arch[l - 1], rand()}});
-    _Biases.insert({l, Matrix<T>{_Arch[l], 1, rand()}});
+    _Links.insert({l, Matrix<T>{_Arch[l], _Arch[l - 1], sub_seeds.at(iseed++)}});
+    _Biases.insert({l, Matrix<T>{_Arch[l], 1, sub_seeds.at(iseed++)}});
     _Np += _Arch[l] * (_Arch[l - 1] + 1);
   }
 
@@ -98,203 +104,202 @@ FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
        std::cout << "- linear output activation function" << std::endl;
      std::cout << "\n";
      */
-   }
-   template <class T>
-   FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
-                              std::vector<T> const &Pars,
-                              std::function<T(T const &)> const &ActFun,
-                              std::function<T(T const &)> const &dActFun,
-                              bool const &LinearOutput) : FeedForwardNN(Arch, 0, ActFun, dActFun, LinearOutput)
-   {
-     SetParameters(Pars);
-   }
+}
+template <class T>
+FeedForwardNN<T>::FeedForwardNN(std::vector<int> const &Arch,
+                                std::vector<T> const &Pars,
+                                std::function<T(T const &)> const &ActFun,
+                                std::function<T(T const &)> const &dActFun,
+                                bool const &LinearOutput) : FeedForwardNN(Arch, 0, ActFun, dActFun, LinearOutput)
+{
+  SetParameters(Pars);
+}
 
-   // Setters
-   template <class T>
-   void FeedForwardNN<T>::SetParameters(std::vector<T> const &Pars)
-   {
-     // Number of parameters
-     const int np = (int)Pars.size();
+// Setters
+template <class T>
+void FeedForwardNN<T>::SetParameters(std::vector<T> const &Pars)
+{
+  // Number of parameters
+  const int np = (int)Pars.size();
 
-     // Check that the size of the parameter vector is equal to the
-     // number of parameters of the current NN.
-     if (np != _Np)
-       Error("SetParameters: the number of parameters does not match that of the NN.");
+  // Check that the size of the parameter vector is equal to the
+  // number of parameters of the current NN.
+  if (np != _Np)
+    Error("SetParameters: the number of parameters does not match that of the NN.");
 
-     for (int ip = 0; ip < np; ip++)
-     {
-       const coordinates coord = _IntMap.at(ip);
-       if (std::get<0>(coord))
-         _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Pars[ip]);
-       else
-         _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Pars[ip]);
-     }
-   }
-   template <class T>
-   void FeedForwardNN<T>::SetParameter(int const &ip, T const &Par)
-   {
-     // Check that the index "ip" is within the allowed bounds.
-     if (ip < 0 || ip >= _Np)
-       Error("SetParameter: index 'ip' out of range.");
+  for (int ip = 0; ip < np; ip++)
+  {
+    const coordinates coord = _IntMap.at(ip);
+    if (std::get<0>(coord))
+      _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Pars[ip]);
+    else
+      _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Pars[ip]);
+  }
+}
+template <class T>
+void FeedForwardNN<T>::SetParameter(int const &ip, T const &Par)
+{
+  // Check that the index "ip" is within the allowed bounds.
+  if (ip < 0 || ip >= _Np)
+    Error("SetParameter: index 'ip' out of range.");
 
-     // Get coordinates
-     const coordinates coord = _IntMap.at(ip);
+  // Get coordinates
+  const coordinates coord = _IntMap.at(ip);
 
-     if (std::get<0>(coord))
-       _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
-     else
-       _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
-   }
+  if (std::get<0>(coord))
+    _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+  else
+    _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+}
 
-   template <class T>
-   void FeedForwardNN<T>::SetParameter(std::string const &sp, T const &Par)
-   {
-     // Get coordinates
-     const coordinates coord = _StrMap.at(sp);
+template <class T>
+void FeedForwardNN<T>::SetParameter(std::string const &sp, T const &Par)
+{
+  // Get coordinates
+  const coordinates coord = _StrMap.at(sp);
 
-     if (std::get<0>(coord))
-       _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
-     else
-       _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
-   }
-   
-   template <class T>
-   void FeedForwardNN<T>::SetLink(int const &l, int const &i, int const &j, T const &Par) { _Links.at(l).SetElement(i, j, Par); }
-   template <class T>
-   void FeedForwardNN<T>::SetBias(int const &l, int const &i, T const &Par) { _Biases.at(l).SetElement(i, 0, Par); }
+  if (std::get<0>(coord))
+    _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+  else
+    _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+}
 
-   // Getters
-   template <class T>
-   std::vector<T> FeedForwardNN<T>::GetParameters() const
-   {
-     // Initialise output vector.
-     std::vector<T> output(_Np);
+template <class T>
+void FeedForwardNN<T>::SetLink(int const &l, int const &i, int const &j, T const &Par) { _Links.at(l).SetElement(i, j, Par); }
+template <class T>
+void FeedForwardNN<T>::SetBias(int const &l, int const &i, T const &Par) { _Biases.at(l).SetElement(i, 0, Par); }
 
-     // Element counter
-     int count = 0;
+// Getters
+template <class T>
+std::vector<T> FeedForwardNN<T>::GetParameters() const
+{
+  // Initialise output vector.
+  std::vector<T> output(_Np);
 
-     // Number of layers
-     const int nl = (int)_Arch.size();
+  // Element counter
+  int count = 0;
 
-     // Now run backwards on the layers to compute the derivatives. Same
-     // ordering as in the 'Derive' function.
-     for (int l = nl - 1; l > 0; l--)
-       for (int i = 0; i < _Arch[l]; i++)
-       {
-         // Biases
-         output[count++] = _Biases.at(l).GetElement(i, 0);
+  // Number of layers
+  const int nl = (int)_Arch.size();
 
-         // Links
-         for (int j = 0; j < _Arch[l - 1]; j++)
-           output[count++] = _Links.at(l).GetElement(i, j);
-       }
+  // Now run backwards on the layers to compute the derivatives. Same
+  // ordering as in the 'Derive' function.
+  for (int l = nl - 1; l > 0; l--)
+    for (int i = 0; i < _Arch[l]; i++)
+    {
+      // Biases
+      output[count++] = _Biases.at(l).GetElement(i, 0);
 
-     return output;
-   }
+      // Links
+      for (int j = 0; j < _Arch[l - 1]; j++)
+        output[count++] = _Links.at(l).GetElement(i, j);
+    }
 
-   // Evaluate NN in Input
-   template <class T>
-   std::vector<T> FeedForwardNN<T>::Evaluate(std::vector<T> const &Input) const
-   {
-     // Check that the size of the input vector is equal to the number of
-     // input nodes.
-     if ((int)Input.size() != _Arch[0])
-       Error("Evaluate: the number of inputs does not match the number of input nodes.");
+  return output;
+}
 
-     // Number of layers
-     const int nl = (int)_Arch.size();
+// Evaluate NN in Input
+template <class T>
+std::vector<T> FeedForwardNN<T>::Evaluate(std::vector<T> const &Input) const
+{
+  // Check that the size of the input vector is equal to the number of
+  // input nodes.
+  if ((int)Input.size() != _Arch[0])
+    Error("Evaluate: the number of inputs does not match the number of input nodes.");
 
-     // Construct output of the NN recursively for the hidden layers.
-     Matrix<T> y(Input.size(), 1, Input);
-     for (int l = 1; l < nl - 1; l++)
-       y = Matrix<T>(_Links.at(l) * y + _Biases.at(l), _ActFun);
+  // Number of layers
+  const int nl = (int)_Arch.size();
 
-     // Now take care of the output layer according to whether it is
-     // linear or not.
-     y = Matrix<T>(_Links.at(nl - 1) * y + _Biases.at(nl - 1), (_LinearOutput ? [](T const &x) -> T { return x; } : _ActFun));
+  // Construct output of the NN recursively for the hidden layers.
+  Matrix<T> y(Input.size(), 1, Input);
+  for (int l = 1; l < nl - 1; l++)
+    y = Matrix<T>(_Links.at(l) * y + _Biases.at(l), _ActFun);
 
-     return y.GetVector();
-   }
+  // Now take care of the output layer according to whether it is
+  // linear or not.
+  y = Matrix<T>(_Links.at(nl - 1) * y + _Biases.at(nl - 1), (_LinearOutput ? [](T const &x) -> T { return x; } : _ActFun));
 
+  return y.GetVector();
+}
 
-   // Evaluate NN and its derivatives in Input
-   template <class T>
-   std::vector<T> FeedForwardNN<T>::Derive(std::vector<T> const &Input) const
-   {
-     // Check that the size of the input vector is equal to the number of
-     // input nodes.
-     if ((int)Input.size() != _Arch[0])
-       Error("Derive: the number of inputs does not match the number of input nodes.");
+// Evaluate NN and its derivatives in Input
+template <class T>
+std::vector<T> FeedForwardNN<T>::Derive(std::vector<T> const &Input) const
+{
+  // Check that the size of the input vector is equal to the number of
+  // input nodes.
+  if ((int)Input.size() != _Arch[0])
+    Error("Derive: the number of inputs does not match the number of input nodes.");
 
-     // Initialise output vector.
-     std::vector<T> output((_Np + 1) * _Arch.back());
+  // Initialise output vector.
+  std::vector<T> output((_Np + 1) * _Arch.back());
 
-     // Element counter
-     int count = 0;
+  // Element counter
+  int count = 0;
 
-     // Number of layers
-     const int nl = (int)_Arch.size();
+  // Number of layers
+  const int nl = (int)_Arch.size();
 
-     // Compute NN recursively and save the quantities that will be
-     // needed to compute the derivatives.
-     std::map<int, Matrix<T>> y;
-     std::map<int, Matrix<T>> z;
-     y.insert({0, Matrix<T>{Input.size(), 1, Input}});
-     for (int l = 1; l < nl - 1; l++)
-     {
-       const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
-       y.insert({l, Matrix<T>{M, _ActFun}});
-       z.insert({l, Matrix<T>{M, _dActFun}});
-     }
+  // Compute NN recursively and save the quantities that will be
+  // needed to compute the derivatives.
+  std::map<int, Matrix<T>> y;
+  std::map<int, Matrix<T>> z;
+  y.insert({0, Matrix<T>{Input.size(), 1, Input}});
+  for (int l = 1; l < nl - 1; l++)
+  {
+    const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
+    y.insert({l, Matrix<T>{M, _ActFun}});
+    z.insert({l, Matrix<T>{M, _dActFun}});
+  }
 
-     // Now take care of the output layer according to whether it is
-     // linear or not.
-     const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
-     y.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &x) -> T { return T(x); } : _ActFun)}});
-     z.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &) -> T { return T(1); } : _dActFun)}});
+  // Now take care of the output layer according to whether it is
+  // linear or not.
+  const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
+  y.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &x) -> T { return T(x); } : _ActFun)}});
+  z.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &) -> T { return T(1); } : _dActFun)}});
 
-     // Output vector of vector. Push back NN itself as a first element.
-     for (auto const &e : y.at(nl - 1).GetVector())
-       output[count++] = e;
+  // Output vector of vector. Push back NN itself as a first element.
+  for (auto const &e : y.at(nl - 1).GetVector())
+    output[count++] = e;
 
-     // First compute the Sigma matrix on the output layer that is just
-     // the unity matrix.
-     Matrix<T> Sigma(_Arch[nl - 1], _Arch[nl - 1], std::vector<T>(_Arch[nl - 1] * _Arch[nl - 1], T(0.)));
-     for (int k = 0; k < _Arch[nl - 1]; k++)
-       Sigma.SetElement(k, k, T(1));
+  // First compute the Sigma matrix on the output layer that is just
+  // the unity matrix.
+  Matrix<T> Sigma(_Arch[nl - 1], _Arch[nl - 1], std::vector<T>(_Arch[nl - 1] * _Arch[nl - 1], T(0.)));
+  for (int k = 0; k < _Arch[nl - 1]; k++)
+    Sigma.SetElement(k, k, T(1));
 
-     // Now run backwards on the layers to compute the derivatives.
-     for (int l = nl - 1; l > 0; l--)
-     {
-       const std::vector<T> zl = z.at(l).GetVector();
-       const std::vector<T> ylmo = y.at(l - 1).GetVector();
-       for (int i = 0; i < _Arch[l]; i++)
-       {
-         // Compute derivatives w.r.t. the biases
-         for (int k = 0; k < _Arch[nl - 1]; k++)
-           output[count++] = Sigma.GetElement(k, i) * zl[i];
+  // Now run backwards on the layers to compute the derivatives.
+  for (int l = nl - 1; l > 0; l--)
+  {
+    const std::vector<T> zl = z.at(l).GetVector();
+    const std::vector<T> ylmo = y.at(l - 1).GetVector();
+    for (int i = 0; i < _Arch[l]; i++)
+    {
+      // Compute derivatives w.r.t. the biases
+      for (int k = 0; k < _Arch[nl - 1]; k++)
+        output[count++] = Sigma.GetElement(k, i) * zl[i];
 
-         // Compute derivatives w.r.t. the links
-         for (int j = 0; j < _Arch[l - 1]; j++)
-           for (int k = 0; k < _Arch[nl - 1]; k++)
-             output[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j];
-       }
+      // Compute derivatives w.r.t. the links
+      for (int j = 0; j < _Arch[l - 1]; j++)
+        for (int k = 0; k < _Arch[nl - 1]; k++)
+          output[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j];
+    }
 
-       // Compute Matrix "S" on this layer.
-       std::vector<T> entries;
-       for (int i = 0; i < _Arch[l]; i++)
-         for (int j = 0; j < _Arch[l - 1]; j++)
-           entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+    // Compute Matrix "S" on this layer.
+    std::vector<T> entries;
+    for (int i = 0; i < _Arch[l]; i++)
+      for (int j = 0; j < _Arch[l - 1]; j++)
+        entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
 
-       const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
+    const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
 
-       // Update Matrix "Sigma" for the next step.
-       Sigma = Sigma * S;
-     }
+    // Update Matrix "Sigma" for the next step.
+    Sigma = Sigma * S;
+  }
 
-     return output;
-   }
+  return output;
+}
 
-   // template fixed types
-   template class FeedForwardNN<double>; //<! for numeric and analytic
-   template class FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic
+// template fixed types
+template class FeedForwardNN<double>;                               //<! for numeric and analytic
+template class FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic
