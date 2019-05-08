@@ -41,3 +41,4 @@ run/main
 *.out
 *.app
 
+.DS_Store
