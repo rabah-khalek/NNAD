@@ -1,6 +1,14 @@
 # NNAGD
 Neural Network library for Analytical Gradient Descent interfaced with ceres-solver.
-  
+
+## Installation
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=SOME_PATH
+make
+```
+
 ## Time Performance
 ### Linear
 ![](https://github.com/rabah-khalek/NNAGD/blob/master/plots/time_linear.png)
