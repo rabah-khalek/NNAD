@@ -34,4 +34,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_
 
 # build target library
 add_subdirectory(src)
-add_subdirectory(run)
+add_subdirectory(tests)
