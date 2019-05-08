@@ -9,6 +9,10 @@ cmake .. -DCMAKE_INSTALL_PREFIX=SOME_PATH
 make
 ```
 
+## About the library
+NNAGD provides a Neural network library with analytical derivatives with a simple example script where the library is interfaced with ceres-solver to fit a sin(x) in `tests/main.cc`.
+More elaborate examples, like fitting convoluted functions can be found in `https://github.com/rabah-khalek/NNAGD-Interface`.
+
 ## Time Performance
 ### Linear
 ![](https://github.com/rabah-khalek/NNAGD/blob/master/plots/time_linear.png)
