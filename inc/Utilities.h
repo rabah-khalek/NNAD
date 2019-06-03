@@ -9,8 +9,6 @@
 #include <string>
 #include <math.h>
 
-#include "ceres/jet.h"
-
 template<typename T> T Sigmoid(T const& );
 
 template <typename T> T dSigmoid(T const &);

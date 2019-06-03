@@ -6,8 +6,7 @@
 #include <random>
 #include <stdlib.h>
 
-#include "Utilities.h"
-#include "ceres/jet.h"
+#include "Utilities.imp.h"
 
 template <class T>
 class Matrix

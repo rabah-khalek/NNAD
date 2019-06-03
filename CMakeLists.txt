@@ -34,5 +34,5 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS} -std=c++11 -Wall -fPIC")
 
 # build target library
-add_subdirectory(src)
+#add_subdirectory(src)
 add_subdirectory(tests)
