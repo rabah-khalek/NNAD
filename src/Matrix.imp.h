@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Matrix.h"
 #include "Globals.h"
 
@@ -201,5 +203,5 @@ Matrix<T> Matrix<T>::operator*(T const &coef)
 }
 
 // template fixed types
-template class Matrix<double>;                               //<! for numeric and analytic
-template class Matrix<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic
+// template class Matrix<double>;                               //<! for numeric and analytic
+// template class Matrix<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic

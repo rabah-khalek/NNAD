@@ -6,7 +6,7 @@
 
 // Ceres solver
 #include <ceres/ceres.h>
-#include "FeedForwardNN.h"
+#include "FeedForwardNN.imp.h"
 
 // Typedef for the data
 typedef std::tuple<double, double, double> Datapoint;

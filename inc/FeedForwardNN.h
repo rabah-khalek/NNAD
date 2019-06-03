@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Utilities.h"
-#include "Matrix.h"
+#include "Matrix.imp.h"
 
 #include <vector>
 #include <functional>

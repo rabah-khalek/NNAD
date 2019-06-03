@@ -1,9 +1,9 @@
 //
 // Author: Valerio Bertone: valerio.bertone@cern.ch
 //
+#pragma once
 
 #include "FeedForwardNN.h"
-#include "Globals.h"
 
 // Typedef for the coordinates of the NN parameters
 typedef std::tuple<bool, int, int, int> coordinates;
@@ -301,5 +301,5 @@ std::vector<T> FeedForwardNN<T>::Derive(std::vector<T> const &Input) const
 }
 
 // template fixed types
-template class FeedForwardNN<double>;                               //<! for numeric and analytic
-template class FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic
+//template class FeedForwardNN<double>;                               //<! for numeric and analytic
+//template class FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>; //<! for automatic

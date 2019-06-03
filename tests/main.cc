@@ -1,4 +1,4 @@
-#include "FeedForwardNN.h"
+#include "FeedForwardNN.imp.h"
 #include "Timer.h"
 
 #include "AnalyticCostFunction.h"

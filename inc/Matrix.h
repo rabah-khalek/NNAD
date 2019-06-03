@@ -14,7 +14,7 @@ class Matrix
 {
 public:
   // Constructors
-
+  Matrix();
   Matrix(int const &Lines, int const &Columns, int const &RandomSeed = -1);
   Matrix(int const &, int const &, std::vector<T> const &);
 

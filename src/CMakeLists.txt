@@ -1,8 +1,6 @@
 set(src_source
   AnalyticCostFunction.cc
   AutoDiffCostFunction.cc
-  FeedForwardNN.cc
-  Matrix.cc
   NumericCostFunction.cc
   Utilities.cc
   )
