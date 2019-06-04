@@ -21,15 +21,15 @@ pkg_search_module(GFLAGS REQUIRED gflags)
 find_program(NNAGD_CONFIG nnagd-config REQUIRED)
 if (NNAGD_CONFIG)
   exec_program(${NNAGD_CONFIG}
-    ARGS --cppflags
-    OUTPUT_VARIABLE NNAGD_CXX_FLAGS
+    ARGS --cflags
+    OUTPUT_VARIABLE NNAGD_CFLAGS
   )
 endif(NNAGD_CONFIG)
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NNAGD_CFLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS}")
 
 add_subdirectory(src) 
 add_subdirectory(run)
