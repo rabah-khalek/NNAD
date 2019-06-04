@@ -25,7 +25,7 @@ struct NumericCostFunction
 
   bool operator()(double const *const *, double *) const;
 
-  FeedForwardNN<double> *_nn;
+  nnagd::FeedForwardNN<double> *_nn;
   int _Np;
   vectdata _Data;
   std::vector<int> _NNarchitecture;

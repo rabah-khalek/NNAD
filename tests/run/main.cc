@@ -61,9 +61,8 @@ int main(int argc, char *argv[])
   // ============================================================
   // Initialise NN to be fitted to data.
   // ============================================================
-  //FeedForwardNN* nn = new FeedForwardNN{{2, 10, 3}, time(NULL)};
   vector<int> NNarchitecture = InputCard["NNarchitecture"].as<vector<int>>();
-  FeedForwardNN<double> *nn = new FeedForwardNN<double>(NNarchitecture, Seed, true);
+  nnagd::FeedForwardNN<double> *nn = new nnagd::FeedForwardNN<double>(NNarchitecture, Seed, true);
 
   // Generate pseudo data
   //vector<pair<double, double>> Data = GenerateData(Preds, 0.005, 0.01);

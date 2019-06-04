@@ -30,7 +30,7 @@ class AnalyticCostFunction : public ceres::CostFunction
                           double **) const;
 
   private:
-    FeedForwardNN<double> *_nn;
+    nnagd::FeedForwardNN<double> *_nn;
     int _Np;
     vectdata _Data;
     std::vector<int> _NNarchitecture;
