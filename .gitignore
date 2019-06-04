@@ -5,11 +5,8 @@ CMakeFiles
 CTestTestfile.cmake
 Makefile
 cmake_install.cmake
-src/Makefile
-src/cmake_install.cmake
-run/Makefile
-run/cmake_install.cmake
-run/main
+bin/nnagd-config
+tests/run/main
 
 # Compiled Object files
 *.slo

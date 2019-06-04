@@ -64,4 +64,5 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
     }
     return true;
 }
+
 AnalyticCostFunction::~AnalyticCostFunction(){delete _nn;};

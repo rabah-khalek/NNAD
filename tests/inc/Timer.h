@@ -5,6 +5,7 @@
 #pragma once
 
 #include <chrono>
+#include <stdio.h>
 
 /**
  * @brief The Timer class computes the time elapsed between start

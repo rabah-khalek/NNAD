@@ -1,13 +1,17 @@
-#include "FeedForwardNN.imp.h"
 #include "Timer.h"
-
 #include "AnalyticCostFunction.h"
 #include "AutoDiffCostFunction.h"
 #include "NumericCostFunction.h"
 #include "Globals.h"
 
+// NNAGD
+#include <NNAGD/FeedForwardNN.h>
+
 // YAML
 #include "yaml-cpp/yaml.h"
+
+// CERES
+#include "ceres/ceres.h"
 
 // Standard libs
 #include <iostream>
@@ -16,11 +20,11 @@
 #include <fstream>
 #include <string>
 
-
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+
   YAML::Node InputCard;
   string InputCardName;
   int Seed;
@@ -59,7 +63,7 @@ int main(int argc, char *argv[])
   // ============================================================
   //FeedForwardNN* nn = new FeedForwardNN{{2, 10, 3}, time(NULL)};
   vector<int> NNarchitecture = InputCard["NNarchitecture"].as<vector<int>>();
-  FeedForwardNN<double> *nn = new FeedForwardNN<double>(NNarchitecture, Seed);
+  FeedForwardNN<double> *nn = new FeedForwardNN<double>(NNarchitecture, Seed, true);
 
   // Generate pseudo data
   //vector<pair<double, double>> Data = GenerateData(Preds, 0.005, 0.01);

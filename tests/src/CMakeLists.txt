@@ -4,13 +4,11 @@ set(src_source
   NumericCostFunction.cc
   )
 
-add_library(src OBJECT ${src_source})
-
 option(SHARED "Build shared-libray instead of static-libray" ON)
 if(SHARED)
-  add_library(NNAGD SHARED $<TARGET_OBJECTS:src>)
+  add_library(src SHARED ${src_source})
 else(SHARED)
-  add_library(NNAGD STATIC $<TARGET_OBJECTS:src>)
+  add_library(src STATIC ${src_source})
 endif(SHARED)
 
-target_link_libraries(NNAGD ${YAML_LDFLAGS} ${EIGEN3_LDFLAGS} ${CERES_LDFLAGS} ${GLOG_LDFLAGS} ${GFLAGS_LDFLAGS})
+target_link_libraries(src ${YAML_LDFLAGS} ${EIGEN3_LDFLAGS} ${CERES_LDFLAGS} ${GLOG_LDFLAGS} ${GFLAGS_LDFLAGS})

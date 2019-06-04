@@ -12,26 +12,24 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
    set(CMAKE_MACOSX_RPATH 0)
 endif()
 
-# the project name
+# The project name
 project(NNAGD)
 
-# activating some global properties for the project
+# Activating some global properties for the project
 set(NNAGD_VERSION 1.0.0)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(YAML REQUIRED yaml-cpp)
-pkg_search_module(EIGEN3 REQUIRED eigen3)
-pkg_search_module(CERES REQUIRED ceres-solver)
-pkg_search_module(GLOG REQUIRED libglog)
-pkg_search_module(GFLAGS REQUIRED gflags)
+# Configuration script
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix "${prefix}")
+set(includedir "${prefix}/include")
+set(libdir "${prefix}/lib")
+configure_file(
+  "${PROJECT_SOURCE_DIR}/bin/nnagd-config.in"
+  "${PROJECT_SOURCE_DIR}/bin/nnagd-config"
+)
 
-include_directories(${PROJECT_SOURCE_DIR}/inc)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS} -std=c++11 -Wall -fPIC")
-
-# build target library
-add_subdirectory(tests)
+# Install relevant file
+install(FILES ${PROJECT_SOURCE_DIR}/bin/nnagd-config
+	   DESTINATION bin
+	   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/inc/NNAGD DESTINATION include)
