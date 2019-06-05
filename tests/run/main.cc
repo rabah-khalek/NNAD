@@ -4,8 +4,8 @@
 #include "NumericCostFunction.h"
 #include "Globals.h"
 
-// NNAGD
-#include <NNAGD/FeedForwardNN.h>
+// NNAD
+#include <NNAD/FeedForwardNN.h>
 
 // YAML
 #include "yaml-cpp/yaml.h"
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   // Initialise NN to be fitted to data.
   // ============================================================
   vector<int> NNarchitecture = InputCard["NNarchitecture"].as<vector<int>>();
-  nnagd::FeedForwardNN<double> *nn = new nnagd::FeedForwardNN<double>(NNarchitecture, Seed, true);
+  nnad::FeedForwardNN<double> *nn = new nnad::FeedForwardNN<double>(NNarchitecture, Seed, true);
 
   // Generate pseudo data
   //vector<pair<double, double>> Data = GenerateData(Preds, 0.005, 0.01);

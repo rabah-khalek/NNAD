@@ -14,7 +14,7 @@ NumericCostFunction::NumericCostFunction(int const &Np,
                                                             _NNarchitecture(NNarchitecture),
                                                             _Seed(Seed)
 {
-    _nn = new nnagd::FeedForwardNN<double>(_NNarchitecture, _Seed);
+    _nn = new nnad::FeedForwardNN<double>(_NNarchitecture, _Seed);
 }
 
 bool NumericCostFunction::operator()(double const *const *parameters, double *residuals) const

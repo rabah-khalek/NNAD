@@ -7,8 +7,8 @@
 // Ceres solver
 #include <ceres/ceres.h>
 
-// NNAGD
-#include "NNAGD/FeedForwardNN.h"
+// NNAD
+#include "NNAD/FeedForwardNN.h"
 
 // Typedef for the data
 typedef std::tuple<double, double, double> Datapoint;
@@ -30,7 +30,7 @@ class AnalyticCostFunction : public ceres::CostFunction
                           double **) const;
 
   private:
-    nnagd::FeedForwardNN<double> *_nn;
+    nnad::FeedForwardNN<double> *_nn;
     int _Np;
     vectdata _Data;
     std::vector<int> _NNarchitecture;

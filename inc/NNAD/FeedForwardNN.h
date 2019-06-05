@@ -14,7 +14,7 @@
 
 #include "Matrix.h"
 
-namespace nnagd
+namespace nnad
 {
   // Typedef for the coordinates of the NN parameters
   typedef std::tuple<bool, int, int, int> coordinates;

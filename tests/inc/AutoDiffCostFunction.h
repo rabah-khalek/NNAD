@@ -7,8 +7,8 @@
 // Ceres solver
 #include <ceres/ceres.h>
 
-// NNAGD
-#include <NNAGD/FeedForwardNN.h>
+// NNAD
+#include <NNAD/FeedForwardNN.h>
 
 // Typedef for the data
 typedef std::tuple<double,double,double> Datapoint;

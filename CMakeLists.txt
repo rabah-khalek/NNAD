@@ -13,10 +13,10 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
 endif()
 
 # The project name
-project(NNAGD)
+project(NNAD)
 
 # Activating some global properties for the project
-set(NNAGD_VERSION 1.0.0)
+set(NNAD_VERSION 1.0.0)
 
 # Configuration script
 set(prefix ${CMAKE_INSTALL_PREFIX})
@@ -24,12 +24,12 @@ set(exec_prefix "${prefix}")
 set(includedir "${prefix}/include")
 set(libdir "${prefix}/lib")
 configure_file(
-  "${PROJECT_SOURCE_DIR}/bin/nnagd-config.in"
-  "${PROJECT_SOURCE_DIR}/bin/nnagd-config"
+  "${PROJECT_SOURCE_DIR}/bin/nnad-config.in"
+  "${PROJECT_SOURCE_DIR}/bin/nnad-config"
 )
 
 # Install relevant file
-install(FILES ${PROJECT_SOURCE_DIR}/bin/nnagd-config
+install(FILES ${PROJECT_SOURCE_DIR}/bin/nnad-config
 	   DESTINATION bin
 	   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/inc/NNAGD DESTINATION include)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/inc/NNAD DESTINATION include)

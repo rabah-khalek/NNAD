@@ -18,18 +18,18 @@ pkg_search_module(EIGEN3 REQUIRED eigen3)
 pkg_search_module(CERES REQUIRED ceres-solver)
 pkg_search_module(GLOG REQUIRED libglog)
 pkg_search_module(GFLAGS REQUIRED gflags)
-find_program(NNAGD_CONFIG nnagd-config REQUIRED)
-if (NNAGD_CONFIG)
-  exec_program(${NNAGD_CONFIG}
+find_program(NNAD_CONFIG nnad-config REQUIRED)
+if (NNAD_CONFIG)
+  exec_program(${NNAD_CONFIG}
     ARGS --cflags
-    OUTPUT_VARIABLE NNAGD_CFLAGS
+    OUTPUT_VARIABLE NNAD_CFLAGS
   )
-endif(NNAGD_CONFIG)
+endif(NNAD_CONFIG)
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NNAGD_CFLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NNAD_CFLAGS} ${YAML_CFLAGS} ${EIGEN3_CFLAGS} ${CERES_CFLAGS} ${GLOG_CFLAGS} ${GFLAGS_CFLAGS}")
 
 add_subdirectory(src) 
 add_subdirectory(run)

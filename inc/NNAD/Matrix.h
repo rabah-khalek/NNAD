@@ -11,7 +11,7 @@
 
 #include "Utilities.h"
 
-namespace nnagd
+namespace nnad
 {
   template <class T>
   class Matrix

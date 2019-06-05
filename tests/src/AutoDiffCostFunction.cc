@@ -16,7 +16,7 @@ AutoDiffCostFunction::AutoDiffCostFunction(int const &Np,
 template <typename T>
 bool AutoDiffCostFunction::operator()(T const *const *parameters, T *residuals) const
 {
-    nnagd::FeedForwardNN<T> *nn = new nnagd::FeedForwardNN<T>(_NNarchitecture, _Seed);
+    nnad::FeedForwardNN<T> *nn = new nnad::FeedForwardNN<T>(_NNarchitecture, _Seed);
     std::vector<T> pars;
     for (int i = 0; i < _Np; i++)
     {

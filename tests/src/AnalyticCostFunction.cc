@@ -12,7 +12,7 @@ AnalyticCostFunction::AnalyticCostFunction(int const &Np,
                                                               _NNarchitecture(NNarchitecture),
                                                               _Seed(Seed)
 {
-    _nn = new nnagd::FeedForwardNN<double>(_NNarchitecture, _Seed);
+    _nn = new nnad::FeedForwardNN<double>(_NNarchitecture, _Seed);
 
     // Set number of residuals (i.e. number of data points)
     set_num_residuals(_Data.size());

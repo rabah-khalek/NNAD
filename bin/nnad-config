@@ -1,17 +1,17 @@
 #! /usr/bin/env bash
 
 # These variables need to exist
-prefix=@prefix@
-exec_prefix=@exec_prefix@
+prefix=/usr/local
+exec_prefix=/usr/local
 
 if [[ $# -eq 0 || -n $( echo $* | egrep -- "--help|-h" ) ]]; then
     echo
-    echo "nnagd-config: configuration tool for NNAGD: Neural Network library for Analytical Gradient Descent"
-    echo "                webpage: https://github.com/rabah-khalek/NNAGD"
+    echo "nnad-config: configuration tool for NNAD: Neural Network library for Analytical Gradient Descent"
+    echo "                webpage: https://github.com/rabah-khalek/NNAD"
     echo "                contacts: Rabah Abdul Khalek: rabah.khalek@gmail.com"
     echo "                          Valerio Bertone:    valerio.bertone@cern.ch"
     echo
-    echo "Usage: nnagd-config [[--help|-h] | [--prefix]]"
+    echo "Usage: nnad-config [[--help|-h] | [--prefix]]"
     echo "Options:"
     echo "  --help | -h  : show this help message"
     echo "  --prefix     : show the installation prefix (cf. autoconf)"
@@ -22,16 +22,16 @@ fi
 OUT=""
 
 tmp=$( echo "$*" | egrep -- '--\<prefix\>')
-test -n "$tmp" && OUT="$OUT @prefix@"
+test -n "$tmp" && OUT="$OUT /usr/local"
 
 tmp=$( echo "$*" | egrep -- '--\<incdir\>')
-test -n "$tmp" && OUT="$OUT @includedir@"
+test -n "$tmp" && OUT="$OUT /usr/local/include"
 
 tmp=$( echo "$*" | egrep -- '--\<cflags\>')
-test -n "$tmp" && OUT="$OUT -I@includedir@"
+test -n "$tmp" && OUT="$OUT -I/usr/local/include"
 
 ## Version
 tmp=$( echo "$*" | egrep -- '--\<version\>')
-test -n "$tmp" && OUT="$OUT @apfel_VERSION@"
+test -n "$tmp" && OUT="$OUT "
 
 echo $OUT

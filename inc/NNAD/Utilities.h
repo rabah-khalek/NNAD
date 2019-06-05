@@ -9,7 +9,7 @@
 #include <string>
 #include <math.h>
 
-namespace nnagd
+namespace nnad
 {
   template<typename T> T Sigmoid(T const &x)
   {

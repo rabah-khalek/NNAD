@@ -119,10 +119,10 @@ set ytics(0 0, ""1 1, ""2 1, ""3 1, ""4 1,\
           190 0, ""191 1, ""192 1, ""193 1, ""194 1,\
           195 0, ""196 1, ""197 1, ""198 1, ""199 1,\
           200 0)
-set label "NNAGD" center at 71,(ymax+4.5*ymax/30) font ',26'
+set label "NNAD" center at 71,(ymax+4.5*ymax/30) font ',26'
 set label "A Neural Network library for \n Analytical Gradient Descent " center at 94,(ymax+4.9*ymax/30) font ',8'
 
-#set label "NNAGD" center at 71,1400 font ',26'
+#set label "NNAD" center at 71,1400 font ',26'
 #set label "A Neural Network library for \n Analytical Gradient Descent " center at 94,1550 font ',8'
 #set format y "10^{%T}"
 #set ytics(1e-01 0, ""2e-01 1, ""3e-01 1, ""4e-01 1, ""5e-01 1, ""6e-01 1, ""7e-01 1, ""8e-01 1, ""9e-01 1,\
