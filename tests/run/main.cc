@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     double x = xmin + i * xmax / n;
     double y = sin(x);
     double sd = 1e-2 * (rand() % 100) + 0.001;
+
     get<0>(tuple) = x;
     get<1>(tuple) = y;
     get<2>(tuple) = sd;
@@ -209,9 +210,37 @@ int main(int argc, char *argv[])
   cout << "Final chi2 = " << chi2 << endl;
   cout << "\n";
   cout << "Derivatives Choice was: " << DerivativesChoice<<endl;
-  t.stop();
+  double duration = t.stop();
   // ============================================================
 
-  delete nn;
+  //! testing
+  std::vector<double> hidden;
+  for (int i = 1; i < InputCard["NNarchitecture"].as<vector<double>>().size()-1;i++)
+  {
+    hidden.push_back(InputCard["NNarchitecture"].as<vector<double>>()[i]);
+  }
+  bool exist = false;
+  string output_name = "output/" + to_string(np) + ".dat";
+  ifstream f(output_name.c_str());
+  if(f.good())
+    exist=true;
+
+  ofstream out((output_name).c_str(), ios::out | ios::app);
+
+  if(!exist)
+  {
+  out << "Seed "<<" "<<"np"<<" ";
+  for (int i=0;i<hidden.size();i++)
+    out << "arch"+to_string(i+1)<< " ";
+  out << "chi2/dat duration" << endl;
+  }
+  out << Seed <<" "<<np<<" ";
+  for (int i=0;i<hidden.size();i++)
+    out << hidden[i] << " ";
+  out << chi2 << " " << duration << endl;
+
+      //! testing
+
+      delete nn;
   return 0;
 }
