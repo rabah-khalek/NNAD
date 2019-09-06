@@ -1,6 +1,15 @@
 # NNAD
 Neural Network library with Analytical Derivatives.
 
+## Prerequisites (to run tests)
+- cmake
+- pkg-config
+- ceres-solver
+- glog
+- gflags
+- eigen3
+- yaml-cpp
+
 ## Installation
 ```
 mkdir build
