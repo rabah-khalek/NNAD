@@ -28,11 +28,12 @@ class Timer
    * @brief This function stops the timer and reports the elapsed
    * time in seconds since the last time the timer was started.
    */
-  void stop()
+  double stop()
   {
     auto end = std::chrono::steady_clock::now();
     auto diff = end - startTime;
     printf("time elapsed: %5.6f seconds\n", std::chrono::duration <double, std::milli> (diff).count() * 1e-3);
+    return std::chrono::duration<double, std::milli>(diff).count() * 1e-3;
   }
 
  private:
