@@ -5,7 +5,12 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
    set(CMAKE_MACOSX_RPATH 0)
 endif()
 
-add_compile_options(-std=c++11 -Wall -fPIC)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  add_compile_options(-std=c++11 -Wall -fPIC -lpthread -fopenmp) #linux
+else()
+  add_compile_options(-std=c++11 -Wall -fPIC) #mac
+endif()
+
 
 # Activating some global properties for the project
 set(CMAKE_CXX_STANDARD 11)
@@ -13,6 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include relevant packages
 find_package(PkgConfig REQUIRED)
+#find_package(Threads)
 pkg_search_module(YAML REQUIRED yaml-cpp)
 pkg_search_module(EIGEN3 REQUIRED eigen3)
 pkg_search_module(CERES REQUIRED ceres-solver)

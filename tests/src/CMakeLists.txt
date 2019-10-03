@@ -4,11 +4,17 @@ set(src_source
   NumericCostFunction.cc
   )
 
+add_library(src OBJECT ${src_source})
+
 option(SHARED "Build shared-libray instead of static-libray" ON)
 if(SHARED)
-  add_library(src SHARED ${src_source})
+  add_library(Tutorial SHARED $<TARGET_OBJECTS:src>)
 else(SHARED)
-  add_library(src STATIC ${src_source})
+  add_library(Tutorial STATIC $<TARGET_OBJECTS:src>)
 endif(SHARED)
 
-target_link_libraries(src ${YAML_LDFLAGS} ${EIGEN3_LDFLAGS} ${CERES_LDFLAGS} ${GLOG_LDFLAGS} ${GFLAGS_LDFLAGS})
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  target_link_libraries(Tutorial ${YAML_LDFLAGS} ${EIGEN3_LDFLAGS} ${CERES_LDFLAGS} ${GLOG_LDFLAGS} ${GFLAGS_LDFLAGS} -lpthread -fopenmp) 
+else()
+  target_link_libraries(Tutorial ${YAML_LDFLAGS} ${EIGEN3_LDFLAGS} ${CERES_LDFLAGS} ${GLOG_LDFLAGS} ${GFLAGS_LDFLAGS})
+endif() 
