@@ -55,9 +55,6 @@ int main(int argc, char *argv[])
 
   InputCard = YAML::LoadFile((InputCardName).c_str());
 
-  // Timer
-  Timer t;
-
   // ============================================================
   // Initialise NN to be fitted to data.
   // ============================================================
@@ -186,7 +183,10 @@ int main(int argc, char *argv[])
   options.parameter_tolerance = 1e-10;
   options.gradient_tolerance = 1e-10;
   ceres::Solver::Summary summary;
+  // Timer
+  Timer t;
   Solve(options, &problem, &summary);
+  double duration = t.stop();
   cout << summary.FullReport() << "\n";
 
   // Compute final chi2
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
   cout << "Final chi2 = " << chi2 << endl;
   cout << "\n";
   cout << "Derivatives Choice was: " << DerivativesChoice<<endl;
-  double duration = t.stop();
+
   // ============================================================
 
   //! testing
