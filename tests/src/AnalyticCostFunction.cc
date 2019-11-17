@@ -45,9 +45,9 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
             input.push_back(x);
             const std::vector<double> vd = _nn->Derive(input);
 
-            residuals[id] = (vd[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
+            residuals[id] = (vd[0] - std::get<1>(_Data[id]));// / std::get<2>(_Data[id]);
             for (int ip = 0; ip < _Np; ip++)
-                jacobians[ip][id] = (vd[ip + 1]) / std::get<2>(_Data[id]);
+                jacobians[ip][id] = (vd[ip + 1]);// / std::get<2>(_Data[id]);
         }
     }
     // Only residuals
@@ -59,7 +59,7 @@ bool AnalyticCostFunction::Evaluate(double const *const *parameters,
             double x = std::get<0>(_Data[id]);
             input.push_back(x);
             const std::vector<double> v = _nn->Evaluate(input);
-            residuals[id] = (v[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
+            residuals[id] = (v[0] - std::get<1>(_Data[id]));// / std::get<2>(_Data[id]);
         }
     }
     return true;

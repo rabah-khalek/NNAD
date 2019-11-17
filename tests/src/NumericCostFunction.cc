@@ -33,7 +33,7 @@ bool NumericCostFunction::operator()(double const *const *parameters, double *re
         double x = std::get<0>(_Data[id]);
         input.push_back(x);
         const std::vector<double> v = _nn->Evaluate(input);
-        residuals[id] = (v[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
+        residuals[id] = (v[0] - std::get<1>(_Data[id]));// / std::get<2>(_Data[id]);
     }
 
     return true;
