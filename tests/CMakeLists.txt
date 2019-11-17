@@ -6,14 +6,14 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  add_compile_options(-std=c++11 -Wall -fPIC -lpthread -fopenmp) #linux
+  add_compile_options(-g -std=c++14 -stdlib=libc++ -Wall -fPIC -lpthread -fopenmp) #linux
 else()
-  add_compile_options(-std=c++11 -Wall -fPIC) #mac
+  add_compile_options(-g -std=c++14 -stdlib=libc++ -Wall -fPIC) #mac
 endif()
 
 
 # Activating some global properties for the project
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include relevant packages
