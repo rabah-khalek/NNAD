@@ -6,6 +6,10 @@
 
 // Ceres solver
 #include <ceres/ceres.h>
+#include "Globals.h"
+#include <iostream>
+#include <tuple>
+
 
 // NNAD
 #include <NNAD/FeedForwardNN.h>
@@ -22,13 +26,16 @@ class AutoDiffCostFunction
                          std::vector<int> const &,
                          int const &);
 
-    template <typename T>
-    bool operator()(T const *const *, T *) const;
-    
+    ~AutoDiffCostFunction();
+
+        template <typename T>
+        bool operator()(T const *const *, T *) const;
+
   private:
     int _Np;
     vectdata _Data;
     std::vector<int> _NNarchitecture;
     int _Seed;
+    std::tuple<nnad::FeedForwardNN<double>*, nnad::FeedForwardNN<ceres::Jet<double, GLOBALS::kStride>>*> nns;
 };
 
