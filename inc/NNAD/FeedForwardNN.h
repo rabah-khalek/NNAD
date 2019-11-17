@@ -44,6 +44,15 @@ namespace nnad
   {
   public:
     //_________________________________________________________________________________
+    FeedForwardNN(std::function<T(T const &)> const &ActFun = Sigmoid<T>,
+                  std::function<T(T const &)> const &dActFun = dSigmoid<T>,
+                  bool const &LinearOutput = true) : _ActFun(ActFun),
+                                                     _dActFun(dActFun),
+                                                     _LinearOutput(LinearOutput)
+    {
+    }
+
+    //_________________________________________________________________________________
     FeedForwardNN(std::vector<int>            const &Arch,
   		  int                         const &RandomSeed,
   		  bool                        const &Report = false,
