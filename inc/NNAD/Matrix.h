@@ -28,7 +28,13 @@ namespace nnad
 
       // Fill in the matrix with random numbers distributed in [-1:1].
       for (int i = 0; i < _Lines * _Columns; i++)
-	_Matrix[i] = T(2e-2 * (rand() % 100) - 1);
+      {
+        double temp = 2e-2 * (rand() % 100) - 1; 
+        while(!temp)
+          temp = 2e-2 * (rand() % 100) - 1;
+
+        _Matrix[i] = T(temp);
+      }
     }
 
     //_________________________________________________________________________________

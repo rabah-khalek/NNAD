@@ -26,15 +26,15 @@ AutoDiffCostFunction::~AutoDiffCostFunction()
 template <typename T>
 bool AutoDiffCostFunction::operator()(T const *const *parameters, T *residuals) const
 {
-    //static nnad::FeedForwardNN<T> nn(_NNarchitecture, _Seed); //another way to call NN
+    static nnad::FeedForwardNN<T> nn(_NNarchitecture, _Seed); //another way to call NN
     
     std::vector<T> pars;
     for (int i = 0; i < _Np; i++)
     {
         pars.push_back(parameters[i][0]);
     }
-    std::get<nnad::FeedForwardNN<T>*>(nns)->SetParameters(pars);
-    //nn.SetParameters(pars); //another way to call NN
+    //std::get<nnad::FeedForwardNN<T>*>(nns)->SetParameters(pars);
+    nn.SetParameters(pars); //another way to call NN
 
     // Set parameters of the NN
 
@@ -43,8 +43,8 @@ bool AutoDiffCostFunction::operator()(T const *const *parameters, T *residuals) 
         std::vector<T> input;
         T x = T(std::get<0>(_Data[id]));
         input.push_back(x);
-        const std::vector<T> v = std::get<nnad::FeedForwardNN<T>*>(nns)->Evaluate(input);
-        //const std::vector<T> v = nn.Evaluate(input); //another way to call NN
+        //const std::vector<T> v = std::get<nnad::FeedForwardNN<T>*>(nns)->Evaluate(input);
+        const std::vector<T> v = nn.Evaluate(input); //another way to call NN
 
         residuals[id] = (v[0] - std::get<1>(_Data[id]));
     }

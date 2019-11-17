@@ -71,14 +71,14 @@ int main(int argc, char *argv[])
 
   const int n = 100;
   vectdata Data;
-  double xmin = 0.1;
-  double xmax = 3*6.28;
+  double xmin = -1*3.14;
+  double xmax = 2*3.14;//0.4*3.14;
   for (int i = 0; i < n; i++)
   {
     Datapoint tuple;
     double x = xmin + i * xmax / n;
     double sd = 1e-2 * (rand() % 100);
-    double y = sin(x)+sd;
+    double y = sin(x);//sd;
 
     get<0>(tuple) = x;
     get<1>(tuple) = y;
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
   {
     chi2 += pow((Predictions[id][0] - get<1>(Data[id])), 2); // / get<2>(Data[id])
 
-    //std::cout << get<0>(Data[id]) << " " << Predictions[id][0]<< " " << get<1>(Data[id]) << endl;
+    std::cout << get<0>(Data[id]) << " " << Predictions[id][0]<< " " << get<1>(Data[id]) << endl;
   }
   chi2 /= n;
   cout << "Final chi2 = " << chi2 << endl;
