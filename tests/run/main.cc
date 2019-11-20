@@ -16,12 +16,26 @@
 // Standard libs
 #include <iostream>
 #include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <random>
+
+#include "gsl/gsl_sf_legendre.h"
+
 
 using namespace std;
 
+// n = 0
+double P0(double x) { return 1.;}
+double P1(double x) { return x;}
+double P2(double x) { return ((3 * x * x) - 1)*1. / 2;}
+double P3(double x) { return 0.5 * (5 * std::pow(x, 3) - 3 * x); }
+double P4(double x) { return 0.125 * (35 * std::pow(x, 4) - 30 * x * x + 3); }
+double P5(double x) { return (1. / 8) * (63 * pow(x, 5) - 70 * pow(x, 3) + 15 * x); }
+double P6(double x) { return (1. / 16) * (231 * pow(x, 6) - 315 * pow(x, 4) + 105 * pow(x, 2) - 5); }
+double P10(double x) { return (1. / 256) * (46189 * pow(x, 10) - 109395 * pow(x, 8) + 90090 * pow(x, 6) - 30030 * pow(x, 4) + 3465 * pow(x, 2) - 63); }
 int main(int argc, char *argv[])
 {
 
@@ -71,18 +85,44 @@ int main(int argc, char *argv[])
 
   const int n = 100;
   vectdata Data;
-  double xmin = -1*3.14;
-  double xmax = 2*3.14;//0.4*3.14;
+  double xmin = -1;
+  double xmax = 1;//0.4*3.14;
+
+  //---- noise
+  double noise_mean = 0;
+  double noise_sd = 0.1;
+  //std::random_device rd{};
+  //std::mt19937 gen{InputCard["Seed"].as<int>()};
+  std::default_random_engine gen(Seed);
+  std::normal_distribution<> noise_gen{noise_mean, noise_sd};
+  //----
+
+  std::vector<double> truth;
   for (int i = 0; i < n; i++)
   {
     Datapoint tuple;
-    double x = xmin + i * xmax / n;
-    double sd = 1e-2 * (rand() % 100);
-    double y = sin(x);//sd;
+    double x = xmin + i * (xmax-xmin) / n;
+    double y = P10(x); //pow(sin(x),2)+1;//sd;
+
+    truth.push_back(y);
+
+    //---- noise
+    double noise = 0;
+    while(! noise)
+      if(y!=0)
+        noise = noise_gen(gen)*y;
+      else
+        noise = noise_gen(gen);
+    //
+
+    //double sd = (0.1e-2 * (rand() % 100)); //[0 to 10%]
+    //while(!sd)
+    //  sd = (0.1e-2 * (rand() % 100)); 
+    //sd*= y;
 
     get<0>(tuple) = x;
-    get<1>(tuple) = y;
-    get<2>(tuple) = sd;
+    get<1>(tuple) = y+noise;
+    get<2>(tuple) = std::abs(noise);
     Data.push_back(tuple);
   }
 
@@ -171,7 +211,7 @@ int main(int argc, char *argv[])
   }
   //exit(1);
   for (int id = 0; id < n; id++)
-    chi2 += pow((Predictions[id][0] - get<1>(Data[id])), 2);
+    chi2 += pow((Predictions[id][0] - get<1>(Data[id])) / get<2>(Data[id]), 2);
   chi2 /= n;
   cout << "Initial chi2 = " << chi2 << endl;
   cout << "\n";
@@ -179,9 +219,9 @@ int main(int argc, char *argv[])
   ceres::Solver::Options options;
   options.max_num_iterations = 1000;
   options.minimizer_progress_to_stdout = true;
-  options.function_tolerance = 1e-10;
-  options.parameter_tolerance = 1e-10;
-  options.gradient_tolerance = 1e-10;
+  options.function_tolerance = 1e-20;
+  options.parameter_tolerance = 1e-20;
+  options.gradient_tolerance = 1e-20;
   ceres::Solver::Summary summary;
   // Timer
   Timer t;
@@ -204,11 +244,11 @@ int main(int argc, char *argv[])
         v = nn->Evaluate(x);
     Predictions.at(i) = v;
   }
+  ofstream test("test.dat");
   for (int id = 0; id < n; id++)
   {
-    chi2 += pow((Predictions[id][0] - get<1>(Data[id])), 2); // / get<2>(Data[id])
-
-    std::cout << get<0>(Data[id]) << " " << Predictions[id][0]<< " " << get<1>(Data[id]) << endl;
+    chi2 += pow((Predictions[id][0] - get<1>(Data[id])) / get<2>(Data[id]), 2);
+    test << get<0>(Data[id]) << " " << Predictions[id][0] << " " << get<1>(Data[id]) << " " << truth[id] << " " << get<2>(Data[id]) << endl;
   }
   chi2 /= n;
   cout << "Final chi2 = " << chi2 << endl;

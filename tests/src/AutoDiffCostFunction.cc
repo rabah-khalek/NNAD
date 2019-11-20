@@ -46,7 +46,7 @@ bool AutoDiffCostFunction::operator()(T const *const *parameters, T *residuals) 
         //const std::vector<T> v = std::get<nnad::FeedForwardNN<T>*>(nns)->Evaluate(input);
         const std::vector<T> v = nn.Evaluate(input); //another way to call NN
 
-        residuals[id] = (v[0] - std::get<1>(_Data[id]));
+        residuals[id] = (v[0] - std::get<1>(_Data[id])) / std::get<2>(_Data[id]);
     }
 
     return true;
