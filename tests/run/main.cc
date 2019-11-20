@@ -244,11 +244,11 @@ int main(int argc, char *argv[])
         v = nn->Evaluate(x);
     Predictions.at(i) = v;
   }
-  ofstream test("test.dat");
+  //ofstream test("test.dat");
   for (int id = 0; id < n; id++)
   {
     chi2 += pow((Predictions[id][0] - get<1>(Data[id])) / get<2>(Data[id]), 2);
-    test << get<0>(Data[id]) << " " << Predictions[id][0] << " " << get<1>(Data[id]) << " " << truth[id] << " " << get<2>(Data[id]) << endl;
+    //test << get<0>(Data[id]) << " " << Predictions[id][0] << " " << get<1>(Data[id]) << " " << truth[id] << " " << get<2>(Data[id]) << endl;
   }
   chi2 /= n;
   cout << "Final chi2 = " << chi2 << endl;
