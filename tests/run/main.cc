@@ -83,14 +83,15 @@ int main(int argc, char *argv[])
   // Prepare the model
   // ============================================================
 
-  const int n = 100;
+  int n = InputCard["Ndata"].as<int>();
   vectdata Data;
-  double xmin = -1;
-  double xmax = 1;//0.4*3.14;
+  double xmin = InputCard["xmin"].as<double>();
+  double xmax = InputCard["xmax"].as<double>();//0.4*3.14;
+  double yshift = InputCard["yshift"].as<double>();
 
   //---- noise
-  double noise_mean = 0;
-  double noise_sd = 0.1;
+  double noise_mean = InputCard["noise_mean"].as<double>();
+  double noise_sd = InputCard["noise_sd"].as<double>();
   //std::random_device rd{};
   //std::mt19937 gen{InputCard["Seed"].as<int>()};
   std::default_random_engine gen(Seed);
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
   {
     Datapoint tuple;
     double x = xmin + i * (xmax-xmin) / n;
-    double y = P10(x); //pow(sin(x),2)+1;//sd;
+    double y = P10(x) + yshift; //pow(sin(x),2)+1;//sd;
 
     truth.push_back(y);
 
@@ -217,9 +218,9 @@ int main(int argc, char *argv[])
   cout << "\n";
 
   ceres::Solver::Options options;
-  options.max_num_iterations = 1000;
+  options.max_num_iterations = InputCard["max_num_iterations"].as<int>();
   options.minimizer_progress_to_stdout = true;
-  options.function_tolerance = 1e-20;
+  options.function_tolerance = InputCard["function_tolerance"].as<double>();
   options.parameter_tolerance = 1e-20;
   options.gradient_tolerance = 1e-20;
   ceres::Solver::Summary summary;
@@ -244,14 +245,15 @@ int main(int argc, char *argv[])
         v = nn->Evaluate(x);
     Predictions.at(i) = v;
   }
-  //ofstream test("test.dat");
+  ofstream test("test.dat");
   for (int id = 0; id < n; id++)
   {
     chi2 += pow((Predictions[id][0] - get<1>(Data[id])) / get<2>(Data[id]), 2);
-    //test << get<0>(Data[id]) << " " << Predictions[id][0] << " " << get<1>(Data[id]) << " " << truth[id] << " " << get<2>(Data[id]) << endl;
+    test << get<0>(Data[id]) << " " << Predictions[id][0] << " " << get<1>(Data[id]) << " " << truth[id] << " " << get<2>(Data[id]) << endl;
   }
   chi2 /= n;
   cout << "Final chi2 = " << chi2 << endl;
+  cout << "Number of parameters = "<< np <<endl;
   cout << "\n";
   cout << "Derivatives Choice was: " << DerivativesChoice<<endl;
 
