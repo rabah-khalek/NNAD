@@ -1,3 +1,16 @@
-Seed: 1031
-NNarchitecture: [1,2,2,1]
+Seed: 5187
+NNarchitecture: [1,6,5,1]
 Derivatives: Analytic #Analytic #Automatic #Numeric 
+
+#PseudoData options
+Ndata: 100
+xmin: -1
+xmax: 1
+yshift: 1
+
+noise_mean: 0
+noise_sd: 0.1 #10%
+
+max_num_iterations: 1000
+function_tolerance: 1e-20
+
