@@ -266,7 +266,10 @@ int main(int argc, char *argv[])
     hidden.push_back(InputCard["NNarchitecture"].as<vector<double>>()[i]);
   }
   bool exist = false;
-  string output_name = "output/" + DerivativesChoice+"/" + to_string(np) + ".dat";
+  string output_name = "output/" + DerivativesChoice+"/" + to_string(np)+"_";
+  for (int i = 0; i < hidden.size(); i++)
+    output_name += "_"+to_string(int(hidden.at(i)));
+  output_name += ".dat";
   ifstream f(output_name.c_str());
   if(f.good())
     exist=true;
