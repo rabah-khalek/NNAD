@@ -39,3 +39,9 @@ tests/run/main
 *.app
 
 .DS_Store
+
+# Documentation
+doc/html
+
+# Executables of the test programs
+tests/TestDerivatives

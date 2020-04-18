@@ -13,7 +13,9 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
 endif()
 
 # The project name
-project(NNAD)
+project(NNAD CXX)
+
+set(CMAKE_CXX_STANDARD 11)
 
 # Activating some global properties for the project
 set(NNAD_VERSION 1.0.0)
@@ -27,6 +29,14 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/bin/nnad-config.in"
   "${PROJECT_SOURCE_DIR}/bin/nnad-config"
 )
+
+include_directories(${PROJECT_SOURCE_DIR}/inc)
+
+option(BUILD_TESTS "Build tests code" ON)
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif(BUILD_TESTS)
 
 # Install relevant file
 install(FILES ${PROJECT_SOURCE_DIR}/bin/nnad-config
