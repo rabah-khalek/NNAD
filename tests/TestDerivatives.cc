@@ -9,18 +9,21 @@
 
 int main()
 {
-  // Test input vector
-  std::vector<double> x{0.1, 2.3, 4.5};
-  std::cout << "\nInput: x = { ";
-  for (auto const& e : x)
-    std::cout << e << " ";
-  std::cout << "}" << std::endl;
-
   // Define architecture
   const std::vector<int> arch{3, 5, 5, 3};
 
   // Initialise NN
   const nnad::FeedForwardNN<double> nn{arch, 0, true};
+
+  // Input vector
+  std::vector<double> x{0.1, 2.3, 4.5};
+  std::cout << "Input: x = { ";
+  for (auto const& e : x)
+    std::cout << e << " ";
+  std::cout << "}\n" << std::endl;
+
+  // Get NN at x
+  std::vector<double> ders = nn.Evaluate(x);
 
   // Compute the derivatives numerically and incremental ratios
   const double eps = 1e-5;
@@ -28,7 +31,6 @@ int main()
   const int np = (int) pars.size();
 
   // Loop over all derivatives
-  std::vector<double> ders{nn.Evaluate(x)};
   for (int ip = 0; ip < np; ip++)
     {
       // Displace ip-th parameter by "eps" up and down
