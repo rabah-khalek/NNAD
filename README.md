@@ -18,6 +18,8 @@ cmake .. -DCMAKE_INSTALL_PREFIX=SOME_PATH
 make
 ```
 
+Code documentation generated with Doxygen can be found [here](https://vbertone.github.io/NNAD/html/index.html).
+
 ## About the library
 NNAD provides a Neural network library with analytical derivatives with a simple example script where the library is interfaced with ceres-solver to fit a sin(x) in `tests/main.cc`.  
 More elaborate examples, like fitting convoluted functions can be found in `https://github.com/rabah-khalek/NNAD-Interface`.
