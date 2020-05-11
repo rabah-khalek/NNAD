@@ -18,6 +18,16 @@ cmake .. -DCMAKE_INSTALL_PREFIX=SOME_PATH
 make
 ```
 
+## Conda Installation
+```
+conda create -n nnad
+conda install gxx_linux-64 (see https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html)
+cd NNAD
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
+make && make install
+```
+
 Code documentation generated with Doxygen can be found [here](https://vbertone.github.io/NNAD/html/index.html).
 
 ## About the library
