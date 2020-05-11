@@ -337,7 +337,7 @@ namespace nnad
       // needed to compute the derivatives.
       std::map<int, Matrix<T>> y;
       std::map<int, Matrix<T>> z;
-      y.insert({0, Matrix<T>{Input.size(), 1, Input}});
+      y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
       for (int l = 1; l < nl - 1; l++)
 	{
 	  const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);

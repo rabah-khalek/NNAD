@@ -5,7 +5,7 @@ CMakeFiles
 CTestTestfile.cmake
 Makefile
 cmake_install.cmake
-bin/nnagd-config
+bin/nnad-config
 tests/run/main
 
 # Compiled Object files
