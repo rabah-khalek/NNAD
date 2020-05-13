@@ -1,16 +1,10 @@
 # NNAD
-Neural Network library with Analytical Derivatives.
 
-## Prerequisites (to run tests)
-- cmake
-- pkg-config
-- ceres-solver
-- glog
-- gflags
-- eigen3
-- yaml-cpp
+`NNAD` stands for Neural Network Analytic Derivatives and is a C++ implementation of the analytic derivatives of a feed-forward neural network with arbitrary architecture with respect to its free parameters. We adopeted the back-propagation method that makes the computation of derivatives in the context of minimisation problems particularly performing.
 
 ## Installation
+
+The `NNAD` library only relies on `cmake` for configuration and installation. This is done by following the standar procedure:
 ```
 mkdir build
 cd build
@@ -19,6 +13,8 @@ make
 ```
 
 ## Conda Installation
+
+Alternatively, one can use `Conda`:
 ```
 conda create -n nnad
 conda install gxx_linux-64 (see https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html)
@@ -28,21 +24,19 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
 make && make install
 ```
 
-Code documentation generated with Doxygen can be found [here](https://vbertone.github.io/NNAD/html/index.html).
+## Documentation
 
-## About the library
-NNAD provides a Neural network library with analytical derivatives with a simple example script where the library is interfaced with ceres-solver to fit a sin(x) in `tests/main.cc`.  
-More elaborate examples, like fitting convoluted functions can be found in `https://github.com/rabah-khalek/NNAD-Interface`.
+A detailed documentation of the code generated with Doxygen can be found [here](https://vbertone.github.io/NNAD/html/index.html).
 
-## Time Performance
-### Linear
-![](https://github.com/rabah-khalek/NNAD/blob/master/plots/time_linear.png)
-### Logarithmic
-![](https://github.com/rabah-khalek/NNAD/blob/master/plots/time_log.png)
+## Examples
 
-## Seeds Dependency
-A table is needed here to compare He-et-al parameter initialization versus others.
+A simple example of the usage of `NNAD`, where analytic derivatives are compared to a numerical evaluation, can be found in `tests/main.cc`. More elaborate examples, where `NNAD` is used in minimisation problems, are instead collected [here](https://github.com/rabah-khalek/NNAD-Interface).
 
-## Output fitted function
-Fitting sin(x) with n=100 linear steps in x:
-![](https://github.com/rabah-khalek/NNAD/blob/master/plots/output.png)
+## Reference
+
+- Rabah Abdul Khalek, Valerio Bertone, *On the derivatives of feed-forward neural networks*, arXiv:2005.xxxxx
+
+## Contacts
+
+- Rabah Abdul Khalek: rabah.khalek@gmail.com
+- Valerio Bertone: valerio.bertone@cern.ch
