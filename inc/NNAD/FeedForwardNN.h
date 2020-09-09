@@ -294,12 +294,12 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    std::vector<T> Evaluate(std::vector<T> const &Input) const
+    Matrix<T> mEvaluate(std::vector<T> const &Input) const
     {
       // Check that the size of the input vector is equal to the number of
       // input nodes.
       if ((int)Input.size() != _Arch[0])
-	Error("Evaluate: the number of inputs does not match the number of input nodes.");
+        Error("Evaluate: the number of inputs does not match the number of input nodes.");
 
       // Number of layers
       const int nl = (int)_Arch.size();
@@ -307,13 +307,19 @@ namespace nnad
       // Construct output of the NN recursively for the hidden layers.
       Matrix<T> y(Input.size(), 1, Input);
       for (int l = 1; l < nl - 1; l++)
-	y = Matrix<T>(_Links.at(l) * y + _Biases.at(l), _ActFun);
+        y = Matrix<T>(_Links.at(l) * y + _Biases.at(l), _ActFun);
 
       // Now take care of the output layer according to whether it is
       // linear or not.
       y = Matrix<T>(_Links.at(nl - 1) * y + _Biases.at(nl - 1), (_LinearOutput ? [](T const &x) -> T { return x; } : _ActFun));
 
-      return y.GetVector();
+      return y;
+    }
+
+    //_________________________________________________________________________________
+    std::vector<T> Evaluate(std::vector<T> const &Input) const
+    {
+      return mEvaluate(Input).GetVector();
     }
 
     //_________________________________________________________________________________
