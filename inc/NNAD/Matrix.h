@@ -18,6 +18,10 @@ namespace nnad
   {
   public:
     //_________________________________________________________________________________
+    Matrix()
+    {}
+
+    //_________________________________________________________________________________
     Matrix(int const &Lines, int const &Columns, int const &RandomSeed = -1):
     _Lines(Lines),
     _Columns(Columns),
@@ -58,6 +62,23 @@ namespace nnad
     	const int n = (int)xv.size();
     	for (int i = 0; i < n; i++)
     	  _Matrix[i] = f(xv[i]);
+    }
+
+    //_________________________________________________________________________________
+    void Transpose()
+    {
+      std::vector<T> new_Matrix(_Columns * _Lines);
+      for (int i = 0; i < _Lines; i++)
+      {
+        for (int j = 0; j < _Columns; j++)
+        {
+          new_Matrix[j*_Lines + i] = _Matrix[i * _Columns + j];
+        }
+      }
+      int temp = _Lines;
+      _Lines = _Columns;
+      _Columns=temp;
+      _Matrix=new_Matrix;
     }
 
     //_________________________________________________________________________________
