@@ -250,4 +250,22 @@ namespace nnad
     int _Columns;
     std::vector<T> _Matrix;
   };
+
+  //_________________________________________________________________________________
+  Matrix<double> UnitMatrixDouble(int const& n)
+  {
+    std::vector<double> U(n * n, 0);
+    for (int i = 0; i < n; i++)
+      U[n * i + i] = 1;
+    return Matrix<double> {n, n, U};
+  }
+
+  //_________________________________________________________________________________
+  Matrix<int> UnitMatrixInt(int const& n)
+  {
+    std::vector<int> U(n * n, 0);
+    for (int i = 0; i < n; i++)
+      U[n * i + i] = 1;
+    return Matrix<int> {n, n, U};
+  }
 }
