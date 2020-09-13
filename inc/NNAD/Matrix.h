@@ -124,6 +124,24 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    std::vector<T> GetLine(int const& i) const
+    {
+      std::vector<T> line(_Columns);
+      for (int j = 0; j < _Columns; j++)
+	line[j] = GetElement(i, j);
+      return line;
+    }
+
+    //_________________________________________________________________________________
+    std::vector<T> GetColumn(int const& j) const
+    {
+      std::vector<T> column(_Lines);
+      for (int i = 0; i < _Lines; i++)
+	column[i] = GetElement(i, j);
+      return column;
+    }
+
+    //_________________________________________________________________________________
     void operator = (Matrix const &term)
     {
       _Lines = term.GetLines();
