@@ -34,7 +34,7 @@ A simple example of the usage of `NNAD`, where analytic derivatives are compared
 
 ## Reference
 
-- Rabah Abdul Khalek, Valerio Bertone, *On the derivatives of feed-forward neural networks*, arXiv:2005.xxxxx
+- Rabah Abdul Khalek, Valerio Bertone, *On the derivatives of feed-forward neural networks*, arXiv:2005.07039
 
 ## Contacts
 
