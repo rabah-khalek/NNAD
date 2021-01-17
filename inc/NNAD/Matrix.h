@@ -48,7 +48,7 @@ namespace nnad
     _Matrix(Entries)
     {
       // Check that the size of the Entries match the size of the matrix
-      if (_Lines * _Columns != (int)Entries.size())
+      if (_Lines * _Columns != (int) Entries.size())
 	Error("Matrix: the size of the input vector does not match the size of the matrix.");
     }
 

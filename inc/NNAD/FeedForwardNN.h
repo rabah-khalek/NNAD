@@ -19,6 +19,9 @@ namespace nnad
   // Typedef for the coordinates of the NN parameters
   typedef std::tuple<bool, int, int, int> coordinates;
 
+  // Available output functions
+  enum OutputFunction: int {ACTIVATION, LINEAR, QUADRATIC};
+
   /**
    * @brief the FeedForwardNN class evaluates a feed-forward NN and
    * its derivatives for each of the free parameters. The function
@@ -30,9 +33,9 @@ namespace nnad
    * following elements correspond to the derivative w.r.t. the free
    * parameters computed at "x". The ordering of the derivatives is a
    * little weird, this is a consequence of the way the backward
-   * propagation algorithm works.  They start from the output layer
-   * and proceed backward to the first hidden layer (the input layer
-   * is assumed to have no free parameters). For each layer, the index
+   * propagation algorithm works. They start from the output layer and
+   * proceed backward to the first hidden layer (the input layer is
+   * assumed to have no free parameters). For each layer, the index
    * "i" runs over the noded of the layer itself while the index "j"
    * runs over the nodes of the preceding layer. For each value of
    * "i", first comes the derivative w.r.t. the bias "theta_i" then
@@ -44,28 +47,19 @@ namespace nnad
   {
   public:
     //_________________________________________________________________________________
-    FeedForwardNN(std::function<T(T const &)> const &ActFun = Sigmoid<T>,
-                  std::function<T(T const &)> const &dActFun = dSigmoid<T>,
-                  bool const &LinearOutput = true) : _ActFun(ActFun),
-                                                     _dActFun(dActFun),
-                                                     _LinearOutput(LinearOutput)
-    {
-    }
-
-    //_________________________________________________________________________________
     FeedForwardNN(std::vector<int>            const &Arch,
   		  int                         const &RandomSeed,
   		  bool                        const &Report = false,
   		  std::function<T(T const &)> const &ActFun = Sigmoid<T>,
   		  std::function<T(T const &)> const &dActFun = dSigmoid<T>,
-  		  bool                        const &LinearOutput = true):
+  		  OutputFunction              const &OutputFunc = LINEAR):
     _Arch(Arch),
     _ActFun(ActFun),
     _dActFun(dActFun),
-    _LinearOutput(LinearOutput)
+    _OutputFunc(OutputFunc)
     {
       // Number of layers
-      const int nl = (int)_Arch.size();
+      const int nl = (int) _Arch.size();
 
       // Store sub seeds
       srand(RandomSeed);
@@ -126,10 +120,34 @@ namespace nnad
 	    std::cout << n << " ";
 	  std::cout << "]" << std::endl;
 	  std::cout << "- number of parameters = " << _Np << std::endl;
-	  if (_LinearOutput)
-	    std::cout << "- linear output activation function" << std::endl;
+	  // Select integration method
+	  switch (_OutputFunc)
+	    {
+	    case ACTIVATION:
+	      std::cout << "- activation-like output function" << std::endl;
+	      break;
+	    case LINEAR:
+	      std::cout << "- linear output function" << std::endl;
+	      break;
+	    case QUADRATIC:
+	      std::cout << "- quadratic output function" << std::endl;
+	      break;
+	    default:
+	      Error("FeedForwardNN: Unknown output function.");
+	    }
 	  std::cout << "\n";
 	}
+    }
+
+    //_________________________________________________________________________________
+    FeedForwardNN(std::vector<int>            const &Arch,
+  		  int                         const &RandomSeed,
+		  OutputFunction              const &OutputFunc = LINEAR,
+  		  bool                        const &Report = false,
+  		  std::function<T(T const &)> const &ActFun = Sigmoid<T>,
+  		  std::function<T(T const &)> const &dActFun = dSigmoid<T>):
+    FeedForwardNN(Arch, RandomSeed, Report, ActFun, dActFun, OutputFunc)
+    {
     }
 
     //_________________________________________________________________________________
@@ -137,9 +155,9 @@ namespace nnad
   		  std::vector<T>              const &Pars,
   		  std::function<T(T const &)> const &ActFun = Sigmoid<T>,
   		  std::function<T(T const &)> const &dActFun = dSigmoid<T>,
-  		  bool                        const &LinearOutput = true,
+  		  OutputFunction              const &OutputFunc = LINEAR,
   		  bool                        const &Report = false):
-    FeedForwardNN(Arch, 0, Report, ActFun, dActFun, LinearOutput)
+    FeedForwardNN(Arch, 0, Report, ActFun, dActFun, OutputFunc)
     {
       SetParameters(Pars);
     }
@@ -148,7 +166,7 @@ namespace nnad
     void SetParameters(std::vector<T> const &Pars)
     {
       // Number of parameters
-      const int np = (int)Pars.size();
+      const int np = (int) Pars.size();
 
       // Check that the size of the parameter vector is equal to the
       // number of parameters of the current NN.
@@ -212,9 +230,9 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    bool IsOutputLinear() const
+    OutputFunction OutputFunctionType() const
     {
-      return _LinearOutput;
+      return _OutputFunc;
     }
 
     //_________________________________________________________________________________
@@ -275,7 +293,7 @@ namespace nnad
       int count = 0;
 
       // Number of layers
-      const int nl = (int)_Arch.size();
+      const int nl = (int) _Arch.size();
 
       // Now run backwards on the layers to compute the derivatives. Same
       // ordering as in the 'Derive' function.
@@ -298,20 +316,33 @@ namespace nnad
     {
       // Check that the size of the input vector is equal to the number of
       // input nodes.
-      if ((int)Input.size() != _Arch[0])
+      if ((int) Input.size() != _Arch[0])
         Error("Evaluate: the number of inputs does not match the number of input nodes.");
 
       // Number of layers
-      const int nl = (int)_Arch.size();
+      const int nl = (int) _Arch.size();
 
       // Construct output of the NN recursively for the hidden layers.
       Matrix<T> y(Input.size(), 1, Input);
       for (int l = 1; l < nl - 1; l++)
         y = Matrix<T>(_Links.at(l) * y + _Biases.at(l), _ActFun);
 
-      // Now take care of the output layer according to whether it is
-      // linear or not.
-      y = Matrix<T>(_Links.at(nl - 1) * y + _Biases.at(nl - 1), (_LinearOutput ? [](T const &x) -> T { return x; } : _ActFun));
+      // Now take care of the output layer according to the selected
+      // output function.
+      std::function<T(T const &)> f;
+      switch (_OutputFunc)
+	{
+	case ACTIVATION:
+	  f = _ActFun;
+	  break;
+	case LINEAR:
+	  f = [] (T const &x) -> T { return x; };
+	  break;
+	case QUADRATIC:
+	  f = [] (T const &x) -> T { return x * x; };
+	  break;
+	}
+      y = Matrix<T>(_Links.at(nl - 1) * y + _Biases.at(nl - 1), f);
 
       return y;
     }
@@ -327,7 +358,7 @@ namespace nnad
     {
       // Check that the size of the input vector is equal to the number of
       // input nodes.
-      if ((int)Input.size() != _Arch[0])
+      if ((int) Input.size() != _Arch[0])
 	Error("Derive: the number of inputs does not match the number of input nodes.");
 
       // Initialise output vector.
@@ -337,7 +368,7 @@ namespace nnad
       int count = 0;
 
       // Number of layers
-      const int nl = (int)_Arch.size();
+      const int nl = (int) _Arch.size();
 
       // Compute NN recursively and save the quantities that will be
       // needed to compute the derivatives.
@@ -351,11 +382,28 @@ namespace nnad
 	  z.insert({l, Matrix<T>{M, _dActFun}});
 	}
 
-      // Now take care of the output layer according to whether it is
-      // linear or not.
+      // Now take care of the output layer according to the selected
+      // output function.
       const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
-      y.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &x) -> T { return T(x); } : _ActFun)}});
-      z.insert({nl - 1, Matrix<T>{M, (_LinearOutput ? [](T const &) -> T { return T(1); } : _dActFun)}});
+      std::function<T(T const &)> f;
+      std::function<T(T const &)> df;
+      switch (_OutputFunc)
+	{
+	case ACTIVATION:
+	  f  = _ActFun;
+	  df = _dActFun;
+	  break;
+	case LINEAR:
+	  f  = [] (T const &x) -> T { return x; };
+	  df = [] (T const &x) -> T { return T{1}; };
+	  break;
+	case QUADRATIC:
+	  f  = [] (T const &x) -> T { return x * x; };
+	  df = [] (T const &x) -> T { return 2 * x; };
+	  break;
+	}
+      y.insert({nl - 1, Matrix<T>{M, f}});
+      z.insert({nl - 1, Matrix<T>{M, df}});
 
       // Output vector of vector. Push back NN itself as a first element.
       for (auto const &e : y.at(nl - 1).GetVector())
@@ -389,13 +437,11 @@ namespace nnad
 	  for (int i = 0; i < _Arch[l]; i++)
 	    for (int j = 0; j < _Arch[l - 1]; j++)
 	      entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
-
 	  const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
 
 	  // Update Matrix "Sigma" for the next step.
 	  Sigma = Sigma * S;
 	}
-
       return output;
     }
 
@@ -403,7 +449,7 @@ namespace nnad
     const std::vector<int>             _Arch;
     const std::function<T(T const&)>   _ActFun;
     const std::function<T(T const&)>   _dActFun;
-    const bool                         _LinearOutput;
+    const OutputFunction               _OutputFunc;
     int                                _Np;
     std::map<int, Matrix<T> >          _Links;
     std::map<int, Matrix<T> >          _Biases;
