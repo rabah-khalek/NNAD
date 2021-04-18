@@ -73,7 +73,7 @@ namespace nnad
       // Number of parameters
       _Np = 0;
 
-      // Initialise links and biases with random numbers. Biases are
+      // Initialise links and biases with random numbers. Links are
       // treated as matrices that connect consecutive layers with as many
       // rows as nodes of the rightmost layer and as many columns are the
       // leftmost layer. Biases are treated as one-column matrices
