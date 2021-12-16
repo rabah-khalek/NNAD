@@ -362,7 +362,7 @@ namespace nnad
 	Error("Derive: the number of inputs does not match the number of input nodes.");
 
       // Initialise output vector.
-      std::vector<T> output((_Np + 1) * _Arch.back());
+      std::vector<T> output((_Np + 1) * _Arch.back()+_Arch.front());
 
       // Element counter
       int count = 0;
@@ -442,8 +442,17 @@ namespace nnad
 	  // Update Matrix "Sigma" for the next step.
 	  Sigma = Sigma * S;
 	}
-      return output;
-    }
+
+  //!new
+  std::vector<T> y_in = y.at(0).GetVector();
+  for (int i = 0; i < _Arch[0]; i++)
+  {
+    // Compute derivatives w.r.t. the biases
+    for (int k = 0; k < _Arch[nl - 1]; k++)
+      output[count++] = Sigma.GetElement(k, i) * y_in[i];
+  }
+    return output;
+  }
 
   private:
     const std::vector<int>             _Arch;
