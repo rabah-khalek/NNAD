@@ -445,11 +445,17 @@ namespace nnad
 
   //!new
   std::vector<T> y_in = y.at(0).GetVector();
+  const Matrix<T> M_temp = _Links.at(1) * y.at(0);
+  std::vector<T> z_in = M_temp.GetVector();
   for (int i = 0; i < _Arch[0]; i++)
   {
     // Compute derivatives w.r.t. the biases
+    //for (int k = 0; k < _Arch[nl - 1]; k++)
+    //  output[count++] = Sigma.GetElement(k, i) * y_in[i];
+
+    // Compute derivatives w.r.t. the links
     for (int k = 0; k < _Arch[nl - 1]; k++)
-      output[count++] = Sigma.GetElement(k, i) * y_in[i];
+      output[count++] = Sigma.GetElement(k, i) * z_in[i];
   }
     return output;
   }
