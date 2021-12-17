@@ -444,22 +444,11 @@ namespace nnad
 	}
 
   //!new
-  const Matrix<T> M_l0 =  y.at(0) ;
-  Matrix<T> y_l0 = Matrix<T>{M, _ActFun};
-  Matrix<T> z_l0 = Matrix<T>{M, _dActFun};
-
-  std::vector<T> y_l0_v = y_l0.GetVector();
-  std::vector<T> z_l0_v = z_l0.GetVector();
+  std::vector<T> y_in = y.at(0).GetVector();
   for (int i = 0; i < _Arch[0]; i++)
   {
-    // Compute derivatives w.r.t. the biases
-    //for (int k = 0; k < _Arch[nl - 1]; k++)
-    //  output[count++] = Sigma.GetElement(k, i) * y_in[i];
-
-	      // Compute derivatives w.r.t. the links
-	      for (int j = 0; j < _Arch[0]; j++)
 		for (int k = 0; k < _Arch[nl - 1]; k++)
-      output[count++] = Sigma.GetElement(k, i) * z_l0_v[i] * y_l0_v[j];
+      output[count++] = Sigma.GetElement(k, i) * y_in[i];
     }
     return output;
   }
