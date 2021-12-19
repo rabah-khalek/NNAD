@@ -444,14 +444,16 @@ namespace nnad
 	}
 
   //!new
-  std::vector<T> y_in = y.at(0).GetVector();
+  f = _ActFun;
+  df = _dActFun;
+  Matrix<T> z_in{y.at(0), df};
   for (int i = 0; i < _Arch[0]; i++)
   {
 		for (int k = 0; k < _Arch[nl - 1]; k++)
-      output[count++] = Sigma.GetElement(k, i) * y_in[i];
+      output[count++] = Sigma.GetElement(k, i) * z_in.GetVector()[i];
     }
     return output;
-  }
+    }  
 
   private:
     const std::vector<int>             _Arch;
