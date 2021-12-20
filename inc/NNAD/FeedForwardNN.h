@@ -444,15 +444,16 @@ namespace nnad
 	}
 
   //!new
+  const Matrix<T> M_in = _Links.at(1) * y.at(0) + _Biases.at(1);
   f = _ActFun;
   df = _dActFun;
-  Matrix<T> z_in{y.at(0), df};
-  for (int i = 0; i < _Arch[0]; i++)
-  {
-		for (int k = 0; k < _Arch[nl - 1]; k++)
-      output[count++] = Sigma.GetElement(k, i) * z_in.GetVector()[i];
-    }
-    return output;
+  Matrix<T> y_in{M_in, f};
+  Matrix<T> z_in{M_in, df};
+  //for (int i = 0; i < _Arch[0]; i++)
+  //  for (int k = 0; k < _Arch[nl - 1]; k++)
+
+  output[count++] = 2 * _Links.at(1).GetVector()[0] * M_in.GetVector()[0];
+  return output;
     }  
 
   private:
