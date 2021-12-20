@@ -27,7 +27,7 @@ int main()
   std::cout << "inverse = " << std::endl;
   inverse.Display();
 
-  nnad::Matrix<double> pseudoinverse = X.PseudoInverse();
+  nnad::Matrix<double> pseudoinverse = X.PseudoInverse_LLR();
   std::cout << "pseudoinverse = " << std::endl;
   pseudoinverse.Display();
 
@@ -40,7 +40,7 @@ int main()
   std::cout<<"Matrix 2 = "<<std::endl;
   X2.Display();
 
-  nnad::Matrix<double> pseudoinverse2 = X2.PseudoInverse();
+  nnad::Matrix<double> pseudoinverse2 = X2.PseudoInverse_LLR();
   std::cout << "pseudoinverse 2 = " << std::endl;
   pseudoinverse2.Display();
 

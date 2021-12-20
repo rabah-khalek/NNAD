@@ -210,8 +210,9 @@ namespace nnad
 
     // Function to calculate (Moore-Penrose) pseudo-inverse, breaks if
     // matrix is singular
+    // for Linearly independent rows Matrix
     //_________________________________________________________________________________
-    Matrix<T> PseudoInverse()
+    Matrix<T> PseudoInverse_LLC()
     {
       Matrix<T> transpose=(*this);
       transpose.Transpose();
@@ -219,6 +220,20 @@ namespace nnad
       Matrix<T> temp_inverse = temp.Inverse();
       Matrix<T> output = temp_inverse * transpose;
 
+      return output;
+    }
+
+    // Function to calculate (Moore-Penrose) pseudo-inverse, breaks if
+    // matrix is singular
+    // for Linearly independent rows Matrix
+    //_________________________________________________________________________________
+    Matrix<T> PseudoInverse_LLR()
+    {
+      Matrix<T> transpose=(*this);
+      transpose.Transpose();
+      Matrix<T> temp=(*this)*transpose;
+      Matrix<T> temp_inverse = temp.Inverse();
+      Matrix<T> output = transpose*temp_inverse;
       return output;
     }
 
