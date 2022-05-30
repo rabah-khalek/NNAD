@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/170917214.svg)](https://zenodo.org/badge/latestdoi/170917214)
 # NNAD
 
-`NNAD` stands for Neural Network Analytic Derivatives and is a C++ implementation of the analytic derivatives of a feed-forward neural network with arbitrary architecture with respect to its free parameters. We adopeted the back-propagation method that makes the computation of derivatives in the context of minimisation problems particularly performing.
+`NNAD` stands for Neural Network Analytic Derivatives and is a C++ implementation of the analytic derivatives of a feed-forward neural network with arbitrary architecture with respect to its free parameters. We adopted the back-propagation method that makes the computation of derivatives in the context of minimisation problems particularly performing.
 
 ## Installation
 
