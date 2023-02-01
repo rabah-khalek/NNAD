@@ -395,7 +395,7 @@ namespace nnad
 	  break;
 	case LINEAR:
 	  f  = [] (T const &x) -> T { return x; };
-	  df = [] (T const &x) -> T { return T{1}; };
+	  df = [] (T const &)  -> T { return T{1}; };
 	  break;
 	case QUADRATIC:
 	  f  = [] (T const &x) -> T { return x * x; };
