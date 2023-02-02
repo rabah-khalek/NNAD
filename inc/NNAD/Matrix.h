@@ -22,6 +22,14 @@ namespace nnad
     {}
 
     //_________________________________________________________________________________
+    Matrix(Matrix<T> const& M)
+    {
+      _Lines = M.GetLines();
+      _Columns = M.GetColumns();
+      _Matrix = M.GetVector();
+    }
+
+    //_________________________________________________________________________________
     Matrix(int const &Lines, int const &Columns, int const &RandomSeed = -1):
     _Lines(Lines),
     _Columns(Columns),
@@ -298,7 +306,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    void operator = (Matrix const &term)
+    void operator = (Matrix<T> const &term)
     {
       _Lines = term.GetLines();
       _Columns = term.GetColumns();
@@ -306,7 +314,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator + (Matrix const &term)
+    Matrix<T> operator + (Matrix<T> const &term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
@@ -322,7 +330,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator - (Matrix const &term)
+    Matrix<T> operator - (Matrix<T> const &term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
@@ -338,7 +346,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    void operator += (Matrix const &term)
+    void operator += (Matrix<T> const &term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
@@ -351,7 +359,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    void operator -= (Matrix const &term)
+    void operator -= (Matrix<T> const &term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
@@ -364,7 +372,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator * (Matrix const &term) const
+    Matrix<T> operator * (Matrix<T> const &term) const
     {
       const int l1 = _Lines;
       const int c1 = _Columns;
@@ -388,7 +396,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    void operator *= (Matrix const &term)
+    void operator *= (Matrix<T> const &term)
     {
       const int l1 = _Lines;
       const int c1 = _Columns;
