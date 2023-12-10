@@ -41,10 +41,10 @@ int main()
       std::vector<double> parsp(pars.size());
       std::vector<double> parsm(pars.size());
       for (int jp = 0; jp < np; jp++)
-	{
-	  parsp[jp] = (jp == ip ? pars[jp] * ( 1 + eps ) : pars[jp]);
-	  parsm[jp] = (jp == ip ? pars[jp] * ( 1 - eps ) : pars[jp]);
-	}
+        {
+          parsp[jp] = (jp == ip ? pars[jp] * ( 1 + eps ) : pars[jp]);
+          parsm[jp] = (jp == ip ? pars[jp] * ( 1 - eps ) : pars[jp]);
+        }
 
       // Define NNs with the displaced parameters.
       const nnad::FeedForwardNN<double> nnp{arch, parsp};
@@ -55,12 +55,12 @@ int main()
       const std::vector<double> vm = nnm.Evaluate(x);
 
       for (int io = 0; io < arch.back(); io++)
-	if (nn.OutputFunctionType() == nnad::OutputFunction::LINEAR)
-	  ders.push_back(( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
-	else if (nn.OutputFunctionType() == nnad::OutputFunction::QUADRATIC)
-	  ders.push_back(2 * lin[io] * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
-	else if (nn.OutputFunctionType() == nnad::OutputFunction::ACTIVATION)
-	  ders.push_back(nn.GetDerActivationFunction()(lin[io]) * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
+        if (nn.OutputFunctionType() == nnad::OutputFunction::LINEAR)
+          ders.push_back(( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
+        else if (nn.OutputFunctionType() == nnad::OutputFunction::QUADRATIC)
+          ders.push_back(2 * lin[io] * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
+        else if (nn.OutputFunctionType() == nnad::OutputFunction::ACTIVATION)
+          ders.push_back(nn.GetDerActivationFunction()(lin[io]) * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
     }
 
   // Compare derivatives

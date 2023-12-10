@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "Utilities.h"
+
 #include <vector>
 #include <functional>
 #include <random>
-
-#include "Utilities.h"
 
 namespace nnad
 {
@@ -19,57 +19,59 @@ namespace nnad
   public:
     //_________________________________________________________________________________
     Matrix()
-    {}
+    {
+    }
 
     //_________________________________________________________________________________
     Matrix(Matrix<T> const& M)
     {
-      _Lines = M.GetLines();
+      _Lines   = M.GetLines();
       _Columns = M.GetColumns();
-      _Matrix = M.GetVector();
+      _Matrix  = M.GetVector();
     }
 
     //_________________________________________________________________________________
-    Matrix(int const &Lines, int const &Columns, int const &RandomSeed = -1):
-    _Lines(Lines),
-    _Columns(Columns),
-    _Matrix(_Lines * _Columns)
+    Matrix(int const& Lines, int const& Columns, int const& RandomSeed = -1):
+      _Lines(Lines),
+      _Columns(Columns),
+      _Matrix(_Lines * _Columns)
     {
       // Initialise random number generator.
       srand(RandomSeed);
 
-      // Fill in the matrix with random numbers distributed in [-1:1].
+      // Fill in the matrix with random numbers distributed in [-1:1]
       for (int i = 0; i < _Lines * _Columns; i++)
-      {
-        double temp = 2e-2 * (rand() % 100) - 1; 
-        while(!temp)
-          temp = 2e-2 * (rand() % 100) - 1;
+        {
+          double temp = 2e-2 * ( rand() % 100 ) - 1;
+          while(!temp)
+            temp = 2e-2 * ( rand() % 100 ) - 1;
 
-        _Matrix[i] = T(temp);
-      }
+          _Matrix[i] = T(temp);
+        }
     }
 
     //_________________________________________________________________________________
-    Matrix(int const &Lines, int const &Columns, std::vector<T> const &Entries):
-    _Lines(Lines),
-    _Columns(Columns),
-    _Matrix(Entries)
+    Matrix(int const& Lines, int const& Columns, std::vector<T> const& Entries):
+      _Lines(Lines),
+      _Columns(Columns),
+      _Matrix(Entries)
     {
-      // Check that the size of the Entries match the size of the matrix
+      // Check that the size of the Entries match the size of the
+      // matrix.
       if (_Lines * _Columns != (int) Entries.size())
-	Error("Matrix: the size of the input vector does not match the size of the matrix.");
+        Error("Matrix: the size of the input vector does not match the size of the matrix.");
     }
 
     //_________________________________________________________________________________
-    Matrix(Matrix const &x, std::function<T(T const &)> f):
-    _Lines(x.GetLines()),
-    _Columns(x.GetColumns()),
-    _Matrix(_Lines * _Columns)
+    Matrix(Matrix const& x, std::function<T(T const&)> f):
+      _Lines(x.GetLines()),
+      _Columns(x.GetColumns()),
+      _Matrix(_Lines * _Columns)
     {
-    	const std::vector<T> xv = x.GetVector();
-    	const int n = (int)xv.size();
-    	for (int i = 0; i < n; i++)
-    	  _Matrix[i] = f(xv[i]);
+      const std::vector<T> xv = x.GetVector();
+      const int n = (int)xv.size();
+      for (int i = 0; i < n; i++)
+        _Matrix[i] = f(xv[i]);
     }
 
     //_________________________________________________________________________________
@@ -77,19 +79,16 @@ namespace nnad
     {
       std::vector<T> new_Matrix(_Columns * _Lines);
       for (int i = 0; i < _Lines; i++)
-      {
         for (int j = 0; j < _Columns; j++)
-        {
           new_Matrix[j*_Lines + i] = _Matrix[i * _Columns + j];
-        }
-      }
-      int temp = _Lines;
-      _Lines = _Columns;
-      _Columns=temp;
-      _Matrix=new_Matrix;
+
+      const int temp = _Lines;
+      _Lines   = _Columns;
+      _Columns = temp;
+      _Matrix  = new_Matrix;
     }
 
-    // Function to get cofactor matrix 
+    // Function to get cofactor matrix
     //_________________________________________________________________________________
     Matrix<T> GetCofactor(int p, int q)
     {
@@ -101,29 +100,25 @@ namespace nnad
 
       // Looping for each element of the matrix
       for (int row = 0; row < _Lines; row++)
-      {
         for (int col = 0; col < _Columns; col++)
-        {
-          //  Copying into temporary matrix only those element
-          //  which are not in given row and column
+          // Copying into temporary matrix only those element which
+          // are not in given row and column.
           if (row != p && col != q)
-          {
-            output.SetElement(i,j++,  this->GetElement(row,col));
-
-            // Row is filled, so increase row index and
-            // reset col index
-            if (j == _Lines - 1)
             {
-              j = 0;
-              i++;
+              output.SetElement(i,j++,  this->GetElement(row,col));
+
+              // Row is filled, so increase row index and reset col
+              // index.
+              if (j == _Lines - 1)
+                {
+                  j = 0;
+                  i++;
+                }
             }
-          }
-        }
-      }
       return output;
     }
 
-    // Recursive function for finding Determinant of matrix.
+    // Recursive function for finding Determinant of matrix
     //_________________________________________________________________________________
     T Determinant()
     {
@@ -135,21 +130,20 @@ namespace nnad
       //  Base case : if matrix contains single element
       if (_Lines == 1)
         return this->GetElement(0,0);
-        
-      int sign = 1; // To store sign multiplier
+
+      // To store sign multiplier
+      int sign = 1;
 
       // Iterate for each element of first row
       for (int f = 0; f < _Lines; f++)
-      {
-        // Getting Cofactor
-        Matrix<T> Cofactor = this->GetCofactor(0, f);
-        
-        D += sign * this->GetElement(0, f) * Cofactor.Determinant();
+        {
+          // Getting Cofactor
+          Matrix<T> Cofactor = this->GetCofactor(0, f);
+          D += sign * this->GetElement(0, f) * Cofactor.Determinant();
 
-        // terms are to be added with alternate sign
-        sign = -sign;
-      }
-
+          // terms are to be added with alternate sign
+          sign = -sign;
+        }
       return D;
     }
 
@@ -163,34 +157,31 @@ namespace nnad
       Matrix<T> output{_Lines, _Columns};
 
       if (_Lines == 1)
-      {
-        output.SetElement(0,0, T{1});
-        return output;
-      }
+        {
+          output.SetElement(0,0, T{1});
+          return output;
+        }
       int sign = 1;
 
       for (int i = 0; i < _Lines; i++)
-      {
         for (int j = 0; j < _Columns; j++)
-        {
-          // Get cofactor 
-          Matrix<T> Cofactor = this->GetCofactor(i, j);
+          {
+            // Get cofactor
+            Matrix<T> Cofactor = this->GetCofactor(i, j);
 
-          // sign of adj[j][i] positive if sum of row
-          // and column indexes is even.
-          sign = ((i + j) % 2 == 0) ? 1 : -1;
+            // sign of adj[j][i] positive if sum of row
+            // and column indexes is even.
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
 
-          // Interchanging rows and columns to get the
-          // transpose of the cofactor matrix
-          output.SetElement(j, i, (sign) * Cofactor.Determinant());
-        }
-      }
+            // Interchanging rows and columns to get the
+            // transpose of the cofactor matrix
+            output.SetElement(j, i, (sign) * Cofactor.Determinant());
+          }
       return output;
     }
 
-    // Function to calculate inverse, breaks if
-    // matrix is singular
-    //_________________________________________________________________________________
+    // Function to calculate inverse, breaks if matrix is singular
+    // _________________________________________________________________________________
     Matrix<T> Inverse()
     {
       if (_Lines != _Columns)
@@ -198,12 +189,10 @@ namespace nnad
 
       Matrix<T> output{_Lines, _Columns};
 
-      // Find Determinant 
+      // Find Determinant
       T det = this->Determinant();
       if (det == 0)
-      {
         Error("inverse: Singular matrix, can't find its inverse");
-      }
 
       // Find Adjoint
       Matrix<T> adj = this->Adjoint();
@@ -217,54 +206,51 @@ namespace nnad
     }
 
     // Function to calculate (Moore-Penrose) pseudo-inverse, breaks if
-    // matrix is singular
-    // for Linearly independent rows Matrix
-    //_________________________________________________________________________________
+    // matrix is singular for Linearly independent rows Matrix.
+    // _________________________________________________________________________________
     Matrix<T> PseudoInverse_LLC()
     {
-      Matrix<T> transpose=(*this);
+      Matrix<T> transpose = (*this);
       transpose.Transpose();
-      Matrix<T> temp=transpose*(*this);
+      Matrix<T> temp = transpose * (*this);
       Matrix<T> temp_inverse = temp.Inverse();
       Matrix<T> output = temp_inverse * transpose;
-
       return output;
     }
 
     // Function to calculate (Moore-Penrose) pseudo-inverse, breaks if
-    // matrix is singular
-    // for Linearly independent rows Matrix
-    //_________________________________________________________________________________
+    // matrix is singular for Linearly independent rows Matrix.
+    // _________________________________________________________________________________
     Matrix<T> PseudoInverse_LLR()
     {
-      Matrix<T> transpose=(*this);
+      Matrix<T> transpose = (*this);
       transpose.Transpose();
-      Matrix<T> temp=(*this)*transpose;
+      Matrix<T> temp = (*this) * transpose;
       Matrix<T> temp_inverse = temp.Inverse();
-      Matrix<T> output = transpose*temp_inverse;
+      Matrix<T> output = transpose * temp_inverse;
       return output;
     }
 
     //_________________________________________________________________________________
-    void SetElement(int const &i, int const &j, T const &value)
+    void SetElement(int const& i, int const& j, T const& value)
     {
       if (i < 0 || i > _Lines)
-	Error("SetElement: line index out of range.");
+        Error("SetElement: line index out of range.");
 
       if (j < 0 || j > _Columns)
-	Error("SetElement: column index out of range.");
+        Error("SetElement: column index out of range.");
 
       _Matrix[i * _Columns + j] = value;
     }
 
     //_________________________________________________________________________________
-    T GetElement(int const &i, int const &j) const
+    T GetElement(int const& i, int const& j) const
     {
       if (i < 0 || i > _Lines)
-	Error("GetElement: line index out of range.");
+        Error("GetElement: line index out of range.");
 
       if (j < 0 || j > _Columns)
-	Error("GetElement: column index out of range.");
+        Error("GetElement: column index out of range.");
 
       return _Matrix[i * _Columns + j];
     }
@@ -290,139 +276,139 @@ namespace nnad
     //_________________________________________________________________________________
     std::vector<T> GetLine(int const& i) const
     {
-      std::vector<T> line(_Columns);
+      std::vector<T> line{_Columns};
       for (int j = 0; j < _Columns; j++)
-	line[j] = GetElement(i, j);
+        line[j] = GetElement(i, j);
       return line;
     }
 
     //_________________________________________________________________________________
     std::vector<T> GetColumn(int const& j) const
     {
-      std::vector<T> column(_Lines);
+      std::vector<T> column{_Lines};
       for (int i = 0; i < _Lines; i++)
-	column[i] = GetElement(i, j);
+        column[i] = GetElement(i, j);
       return column;
     }
 
     //_________________________________________________________________________________
-    void operator = (Matrix<T> const &term)
+    void operator = (Matrix<T> const& term)
     {
-      _Lines = term.GetLines();
+      _Lines   = term.GetLines();
       _Columns = term.GetColumns();
-      _Matrix = term.GetVector();
+      _Matrix  = term.GetVector();
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator + (Matrix<T> const &term)
+    Matrix<T> operator + (Matrix<T> const& term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
       if (_Lines != l || _Columns != c)
-	Error("Lines or Columns don't match adding the two matrices.");
+        Error("Lines or Columns don't match adding the two matrices.");
 
-      Matrix result(l, c);
+      Matrix result{l, c};
       for (int i = 0; i < l; i++)
-	for (int j = 0; j < c; j++)
-	  result.SetElement(i, j, _Matrix[i * _Columns + j] + term.GetElement(i, j));
+        for (int j = 0; j < c; j++)
+          result.SetElement(i, j, _Matrix[i * _Columns + j] + term.GetElement(i, j));
 
       return result;
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator - (Matrix<T> const &term)
+    Matrix<T> operator - (Matrix<T> const& term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
       if (_Lines != l || _Columns != c)
-	Error("Lines or Columns don't match adding the two matrices.");
+        Error("Lines or Columns don't match adding the two matrices.");
 
-      Matrix result(l, c);
+      Matrix result{l, c};
       for (int i = 0; i < l; i++)
-	for (int j = 0; j < c; j++)
-	  result.SetElement(i, j, _Matrix[i * _Columns + j] - term.GetElement(i, j));
+        for (int j = 0; j < c; j++)
+          result.SetElement(i, j, _Matrix[i * _Columns + j] - term.GetElement(i, j));
 
       return result;
     }
 
     //_________________________________________________________________________________
-    void operator += (Matrix<T> const &term)
+    void operator += (Matrix<T> const& term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
       if (_Lines != l || _Columns != c)
-	Error("Lines or Columns don't match adding the two matrices.");
+        Error("Lines or Columns don't match adding the two matrices.");
 
       for (int i = 0; i < l; i++)
-	for (int j = 0; j < c; j++)
-	  _Matrix[i * _Columns + j] += term.GetElement(i, j);
+        for (int j = 0; j < c; j++)
+          _Matrix[i * _Columns + j] += term.GetElement(i, j);
     }
 
     //_________________________________________________________________________________
-    void operator -= (Matrix<T> const &term)
+    void operator -= (Matrix<T> const& term)
     {
       const int l = term.GetLines();
       const int c = term.GetColumns();
       if (_Lines != l || _Columns != c)
-	Error("Lines or Columns don't match adding the two matrices.");
+        Error("Lines or Columns don't match adding the two matrices.");
 
       for (int i = 0; i < l; i++)
-	for (int j = 0; j < c; j++)
-	  _Matrix[i * _Columns + j] -= term.GetElement(i, j);
+        for (int j = 0; j < c; j++)
+          _Matrix[i * _Columns + j] -= term.GetElement(i, j);
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator * (Matrix<T> const &term) const
+    Matrix<T> operator * (Matrix<T> const& term) const
     {
       const int l1 = _Lines;
       const int c1 = _Columns;
       const int l2 = term.GetLines();
       const int c2 = term.GetColumns();
       if (c1 != l2)
-	Error("Lines or Columns don't match multiplying the two matrices.");
+        Error("Lines or Columns don't match multiplying the two matrices.");
 
-      Matrix result(l1, c2);
+      Matrix result{l1, c2};
       for (int i = 0; i < c2; i++)
-	for (int j = 0; j < l1; j++)
-	  {
-	    T value = T(0);
-	    for (int k = 0; k < c1; k++)
-	      value += _Matrix[j * _Columns + k] * term.GetElement(k, i);
+        for (int j = 0; j < l1; j++)
+          {
+            T value = T(0);
+            for (int k = 0; k < c1; k++)
+              value += _Matrix[j * _Columns + k] * term.GetElement(k, i);
 
-	    result.SetElement(j, i, value);
-	  }
+            result.SetElement(j, i, value);
+          }
 
       return result;
     }
 
     //_________________________________________________________________________________
-    void operator *= (Matrix<T> const &term)
+    void operator *= (Matrix<T> const& term)
     {
       const int l1 = _Lines;
       const int c1 = _Columns;
       const int l2 = term.GetLines();
       const int c2 = term.GetColumns();
       if (c1 != l2)
-	Error("Lines or Columns don't match multiplying the two matrices.");
+        Error("Lines or Columns don't match multiplying the two matrices.");
 
       for (int i = 0; i < c2; i++)
-	for (int j = 0; j < l1; j++)
-	  {
-	    T value = T(0);
-	    for (int k = 0; k < c1; k++)
-	      value += _Matrix[j * _Columns + k] * term.GetElement(k, i);
+        for (int j = 0; j < l1; j++)
+          {
+            T value = T(0);
+            for (int k = 0; k < c1; k++)
+              value += _Matrix[j * _Columns + k] * term.GetElement(k, i);
 
-	    _Matrix[i * _Columns + j] = value;
-	  }
+            _Matrix[i * _Columns + j] = value;
+          }
     }
 
     //_________________________________________________________________________________
-    Matrix<T> operator * (T const &coef)
+    Matrix<T> operator * (T const& coef)
     {
-      Matrix result(_Lines, _Columns);
+      Matrix result{_Lines, _Columns};
       for (int i = 0; i < _Lines; i++)
-	for (int j = 0; j < _Columns; j++)
-	  result.SetElement(i, j, coef * _Matrix[i * _Columns + j]);
+        for (int j = 0; j < _Columns; j++)
+          result.SetElement(i, j, coef * _Matrix[i * _Columns + j]);
 
       return result;
     }
@@ -431,11 +417,11 @@ namespace nnad
     void Display()
     {
       for (int i = 0; i < _Lines; i++)
-      {
-        for (int j = 0; j < _Columns; j++)
-          std::cout << this->GetElement(i,j) << " ";
-        std::cout << std::endl;
-      }
+        {
+          for (int j = 0; j < _Columns; j++)
+            std::cout << this->GetElement(i,j) << " ";
+          std::cout << std::endl;
+        }
       std::cout << std::endl;
     }
 
