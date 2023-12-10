@@ -69,8 +69,7 @@ namespace nnad
       _Matrix(_Lines * _Columns)
     {
       const std::vector<T> xv = x.GetVector();
-      const int n = (int)xv.size();
-      for (int i = 0; i < n; i++)
+      for (int i = 0; i < (int) xv.size(); i++)
         _Matrix[i] = f(xv[i]);
     }
 

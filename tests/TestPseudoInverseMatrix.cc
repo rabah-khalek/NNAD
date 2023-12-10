@@ -2,9 +2,9 @@
 // Authors: Rabah Abdul Khalek: rabah.khalek@gmail.com
 //
 
-#include <iostream>
-
 #include "NNAD/FeedForwardNN.h"
+
+#include <iostream>
 
 int main()
 {

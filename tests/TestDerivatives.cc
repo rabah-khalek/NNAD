@@ -3,9 +3,9 @@
 //          Valerio Bertone: valerio.bertone@cern.ch
 //
 
-#include <iostream>
-
 #include "NNAD/FeedForwardNN.h"
+
+#include <iostream>
 
 int main()
 {
