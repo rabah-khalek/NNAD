@@ -341,7 +341,7 @@ namespace nnad
       const int nl = (int) _Arch.size();
 
       // Construct output of the NN recursively for the hidden layers
-      Matrix<T> y{Input.size(), 1, Input};
+      Matrix<T> y{(int) Input.size(), 1, Input};
       for (int l = 1; l < nl - 1; l++)
         y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
 
