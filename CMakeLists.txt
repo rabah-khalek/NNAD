@@ -15,7 +15,7 @@ endif()
 # The project name
 project(NNAD CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # Activating some global properties for the project
 set(NNAD_VERSION 1.0.0)
