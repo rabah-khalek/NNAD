@@ -275,7 +275,7 @@ namespace nnad
     //_________________________________________________________________________________
     std::vector<T> GetLine(int const& i) const
     {
-      std::vector<T> line{_Columns};
+      std::vector<T> line(_Columns, T{0});
       for (int j = 0; j < _Columns; j++)
         line[j] = GetElement(i, j);
       return line;
@@ -284,7 +284,7 @@ namespace nnad
     //_________________________________________________________________________________
     std::vector<T> GetColumn(int const& j) const
     {
-      std::vector<T> column{_Lines};
+      std::vector<T> column(_Lines, T{0});
       for (int i = 0; i < _Lines; i++)
         column[i] = GetElement(i, j);
       return column;
