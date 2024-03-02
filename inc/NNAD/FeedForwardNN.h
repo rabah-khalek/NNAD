@@ -41,22 +41,42 @@ namespace nnad
    * "i", first comes the derivative w.r.t. the bias "theta_i" then
    * all derivatives w.r.t. the links "omega_{ij}", for all accessible
    * values of "j".
+   *
+   * More recently, we have introduced the possibility to provide the
+   * NN with an arbitrary preprocessing function that can depend on
+   * any number of parameters. The resulting derivative also accouns
+   * for this additional function. This new functionality is backward
+   * compatible.
    */
   template<class T>
   class FeedForwardNN
   {
   public:
+    // Typedef for the preprocessing function. It is a std::function
+    // that returns a vector of T with "( _NpPrep + 1 ) * _Nout"
+    // outputs, where is "_NpPrep" the number of free parameters of
+    // the preprocessing function and "_Nout" is the number of outputs
+    // of the NN. The preprocessing function is a function of another
+    // vector of T with as many entries as inputs of the NN, and a
+    // vector of T containing the "_NpPrep" parameters.
+    typedef std::function<std::vector<T>(std::vector<T> const&, std::vector<T> const&)> Preprocessing;
+
     //_________________________________________________________________________________
     FeedForwardNN(std::vector<int>           const& Arch,
                   int                        const& RandomSeed,
                   bool                       const& Report = false,
                   std::function<T(T const&)> const& ActFun = Sigmoid<T>,
                   std::function<T(T const&)> const& dActFun = dSigmoid<T>,
-                  OutputFunction             const& OutputFunc = LINEAR):
+                  OutputFunction             const& OutputFunc = LINEAR,
+                  Preprocessing              const& Preproc = nullptr,
+                  std::vector<T>             const& PreprocPars = {}):
       _Arch(Arch),
       _ActFun(ActFun),
       _dActFun(dActFun),
-      _OutputFunc(OutputFunc)
+      _OutputFunc(OutputFunc),
+      _Preproc(Preproc),
+      _PreprocPars(_Preproc == nullptr ? std::vector<T> {} : PreprocPars),
+      _NpPrep((int) _PreprocPars.size())
     {
       // Number of layers
       const int nl = (int) _Arch.size();
@@ -70,7 +90,7 @@ namespace nnad
           sub_seeds.push_back(rand());
         }
 
-      // Number of parameters
+      // Number of parameters of the NN
       _Np = 0;
 
       // Initialise links and biases with random numbers. Links are
@@ -129,6 +149,23 @@ namespace nnad
           break;
         }
 
+      // Check sanity of preprocessing function, if present
+      if (_Preproc != nullptr)
+        {
+          // Generate random inputs between 0 and 1 but recasted as T
+          std::vector<T> InPrep;
+          for (int i = 0; i < _Arch.front(); i++)
+            InPrep.push_back(T{1e-2 * ( rand() % 100 )});
+
+          // Test preprocessing function
+          const std::vector<T> OutPrep = _Preproc(InPrep, _PreprocPars);
+
+          // Check that the number of outputs of the preprocessing
+          // function is the same as that of the NN.
+          if (OutPrep.size() != ( _NpPrep + 1 ) * _Arch.back())
+            Error("FeedForwardNN: preprocessing function not well-formed.");
+        }
+
       // Report NN parameters
       if (Report)
         {
@@ -137,20 +174,27 @@ namespace nnad
           for (auto const& n : _Arch)
             std::cout << n << " ";
           std::cout << "]" << std::endl;
-          std::cout << "- number of parameters = " << _Np << std::endl;
-          // Select integration method
+          if (_Preproc != nullptr)
+            {
+              std::cout << "- preprocessing function provided" << std::endl;
+              std::cout << "- number of parameters (NN + preprocessing) = " << _Np << " + " << _NpPrep << " (" << _Np + _NpPrep << ")" << std::endl;
+            }
+          else
+            std::cout << "- number of parameters = " << _Np << std::endl;
+          std::cout << "- NN output function: ";
           switch (_OutputFunc)
             {
             case ACTIVATION:
-              std::cout << "- activation-like output function" << std::endl;
+              std::cout << "activation-like" << std::endl;
               break;
             case LINEAR:
-              std::cout << "- linear output function" << std::endl;
+              std::cout << "linear" << std::endl;
               break;
             case QUADRATIC:
-              std::cout << "- quadratic output function" << std::endl;
+              std::cout << "quadratic" << std::endl;
               break;
             default:
+              std::cout << "unknown" << std::endl;
               Error("FeedForwardNN: Unknown output function.");
             }
           std::cout << "\n";
@@ -162,9 +206,11 @@ namespace nnad
                   int                        const& RandomSeed,
                   OutputFunction             const& OutputFunc = LINEAR,
                   bool                       const& Report = false,
+                  Preprocessing              const& Preproc = nullptr,
+                  std::vector<T>             const& PreprocPars = {},
                   std::function<T(T const&)> const& ActFun = Sigmoid<T>,
                   std::function<T(T const&)> const& dActFun = dSigmoid<T>):
-      FeedForwardNN(Arch, RandomSeed, Report, ActFun, dActFun, OutputFunc)
+      FeedForwardNN(Arch, RandomSeed, Report, ActFun, dActFun, OutputFunc, Preproc, PreprocPars)
     {
     }
 
@@ -174,8 +220,10 @@ namespace nnad
                   std::function<T(T const&)> const& ActFun = Sigmoid<T>,
                   std::function<T(T const&)> const& dActFun = dSigmoid<T>,
                   OutputFunction             const& OutputFunc = LINEAR,
-                  bool                       const& Report = false):
-      FeedForwardNN(Arch, 0, Report, ActFun, dActFun, OutputFunc)
+                  bool                       const& Report = false,
+                  Preprocessing              const& Preproc = nullptr,
+                  std::vector<T>             const& PreprocPars = {}):
+      FeedForwardNN(Arch, 0, Report, ActFun, dActFun, OutputFunc, Preproc, PreprocPars)
     {
       SetParameters(Pars);
     }
@@ -183,15 +231,14 @@ namespace nnad
     //_________________________________________________________________________________
     void SetParameters(std::vector<T> const& Pars)
     {
-      // Number of parameters
-      const int np = (int) Pars.size();
-
       // Check that the size of the parameter vector is equal to the
-      // number of parameters of the current NN.
-      if (np != _Np)
-        Error("SetParameters: the number of parameters does not match that of the NN.");
+      // number of parameters of the current NN plus the number of
+      // parameters of the preprocessing function.
+      if ((int) Pars.size() != _Np + _NpPrep)
+        Error("SetParameters: the number of parameters does not match that of the NN plus that of the preprocessing function.");
 
-      for (int ip = 0; ip < np; ip++)
+      // Set links and biases
+      for (int ip = 0; ip < _Np; ip++)
         {
           const coordinates coord = _IntMap.at(ip);
           if (std::get<0>(coord))
@@ -199,22 +246,33 @@ namespace nnad
           else
             _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Pars[ip]);
         }
+
+      // Set preprocessing parameters
+      for (int ip = 0; ip < _NpPrep; ip++)
+        _PreprocPars[ip] = Pars[_Np + ip];
     }
 
     //_________________________________________________________________________________
     void SetParameter(int const& ip, T const& Par)
     {
       // Check that the index "ip" is within the allowed bounds
-      if (ip < 0 || ip >= _Np)
+      if (ip < 0 || ip >= _Np + _NpPrep)
         Error("SetParameter: index 'ip' out of range.");
 
-      // Get coordinates
-      const coordinates coord = _IntMap.at(ip);
+      // If ip < _Np the parameter corresponds to a NN parameter...
+      if (ip < _Np)
+        {
+          // Get coordinates
+          const coordinates coord = _IntMap.at(ip);
 
-      if (std::get<0>(coord))
-        _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+          if (std::get<0>(coord))
+            _Links.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+          else
+            _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+        }
+      // ...otherwise it's a preprocessing parameter
       else
-        _Biases.at(std::get<1>(coord)).SetElement(std::get<2>(coord), std::get<3>(coord), Par);
+        _PreprocPars[ip - _Np] = Par;
     }
 
     //_________________________________________________________________________________
@@ -242,6 +300,18 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    void SetPreprocessingParameters(std::vector<T> const& ProprocPars)
+    {
+      // Check that the size of the parameter vector is equal to the
+      // number of parameters of the preprocessing function.
+      if ((int) ProprocPars.size() != _NpPrep)
+        Error("SetPreprocessingParameters: the number of parameters does not match that of the preprocessing function.");
+
+      // Set parameters
+      _PreprocPars = ProprocPars;
+    }
+
+    //_________________________________________________________________________________
     std::vector<int> GetArchitecture() const
     {
       return _Arch;
@@ -251,6 +321,12 @@ namespace nnad
     OutputFunction OutputFunctionType() const
     {
       return _OutputFunc;
+    }
+
+    //_________________________________________________________________________________
+    Preprocessing PreprocessingFunction() const
+    {
+      return _Preproc;
     }
 
     //_________________________________________________________________________________
@@ -268,7 +344,19 @@ namespace nnad
     //_________________________________________________________________________________
     int GetParameterNumber() const
     {
+      return _Np + _NpPrep;
+    }
+
+    //_________________________________________________________________________________
+    int GetNeuralNetworkParameterNumber() const
+    {
       return _Np;
+    }
+
+    //_________________________________________________________________________________
+    int GetPreprocessingParameterNumber() const
+    {
+      return _NpPrep;
     }
 
     //_________________________________________________________________________________
@@ -304,6 +392,37 @@ namespace nnad
     //_________________________________________________________________________________
     std::vector<T> GetParameters() const
     {
+      // Initialise output vector
+      std::vector<T> output(_Np + _NpPrep);
+
+      // Element counter
+      int count = 0;
+
+      // Number of layers
+      const int nl = (int) _Arch.size();
+
+      // Neural network parameters
+      for (int l = nl - 1; l > 0; l--)
+        for (int i = 0; i < _Arch[l]; i++)
+          {
+            // Biases
+            output[count++] = _Biases.at(l).GetElement(i, 0);
+
+            // Links
+            for (int j = 0; j < _Arch[l - 1]; j++)
+              output[count++] = _Links.at(l).GetElement(i, j);
+          }
+
+      // Preprocessing parameters
+      for (int ip = 0; ip < _NpPrep; ip++)
+        output[count++] = _PreprocPars[ip];
+
+      return output;
+    }
+
+    //_________________________________________________________________________________
+    std::vector<T> GetNueralNetworkParameters() const
+    {
       // Initialise output vector.
       std::vector<T> output(_Np);
 
@@ -330,6 +449,12 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    std::vector<T> GetPreprocessingParameters() const
+    {
+      return _PreprocPars;
+    }
+
+    //_________________________________________________________________________________
     std::vector<T> Evaluate(std::vector<T> const& Input) const
     {
       // Check that the size of the input vector is equal to the number of
@@ -345,9 +470,17 @@ namespace nnad
       for (int l = 1; l < nl - 1; l++)
         y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
 
-      // Now take care of the output layer according to the selected
-      // output function.
-      return (Matrix<T> {_Links.at(nl - 1) * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
+      // Compute NN
+      std::vector<T> NN = (Matrix<T> {_Links.at(nl - 1) * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
+
+      // Include preprocessing function if necessary
+      if (_Preproc != nullptr)
+        {
+          const std::vector<T> prep = _Preproc(Input, _PreprocPars);
+          std::transform(NN.begin(), NN.end(), prep.begin(), NN.begin(), std::multiplies<T>());
+        }
+
+      return NN;
     }
 
     //_________________________________________________________________________________
@@ -358,8 +491,8 @@ namespace nnad
       if ((int) Input.size() != _Arch[0])
         Error("Derive: the number of inputs does not match the number of input nodes.");
 
-      // Initialise output vector
-      std::vector<T> output((_Np + 1) * _Arch.back());
+      // Initialise dNN vector
+      std::vector<T> dNN((_Np + 1) * _Arch.back());
 
       // Element counter
       int count = 0;
@@ -388,7 +521,7 @@ namespace nnad
       // Output vector of vectors. Push back NN itself as a first
       // element.
       for (auto const& e : y.at(nl - 1).GetVector())
-        output[count++] = e;
+        dNN[count++] = e;
 
       // First compute the Sigma matrix on the output layer that is just
       // the unity matrix.
@@ -405,12 +538,12 @@ namespace nnad
             {
               // Compute derivatives w.r.t. the biases
               for (int k = 0; k < _Arch[nl - 1]; k++)
-                output[count++] = Sigma.GetElement(k, i) * zl[i];
+                dNN[count++] = Sigma.GetElement(k, i) * zl[i];
 
               // Compute derivatives w.r.t. the links
               for (int j = 0; j < _Arch[l - 1]; j++)
                 for (int k = 0; k < _Arch[nl - 1]; k++)
-                  output[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j];
+                  dNN[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j];
             }
 
           // Compute Matrix "S" on this layer
@@ -423,7 +556,35 @@ namespace nnad
           // Update Matrix "Sigma" for the next step
           Sigma = Sigma * S;
         }
-      return output;
+
+      // Include preprocessing function if necessary
+      if (_Preproc != nullptr)
+        {
+          // Get number of outputs
+          const int Nout = _Arch.back();
+
+          // Append to the vector dNN the NN mupliplied by the
+          // derivative of the preprocessing function.
+          for (int ip = 0; ip < _NpPrep; ip++)
+            dNN.insert(dNN.end(), dNN.begin(), dNN.begin() + Nout);
+
+          // Get preprocessing function
+          const std::vector<T> prep = _Preproc(Input, _PreprocPars);
+
+          // Multiply dNN by the preprocessing function, i.e. the
+          // first Nout outputs of prep.
+          for (int ip = 0; ip < _Np + 1; ip++)
+            std::transform(dNN.begin() + Nout * ip, dNN.begin() + Nout * ( ip + 1 ), prep.begin(), dNN.begin() + Nout * ip, std::multiplies<T>());
+
+          // Now multiply the last _NpPrep bunches of Nout entries of
+          // dNN (that for now only contain _NpPrep copies the NN
+          // itself) by the _NpPrep derivatives of the preprocessing
+          // function.
+          for (int ip = _Np + 1; ip < _Np + _NpPrep + 1; ip++)
+            std::transform(dNN.begin() + Nout * ip, dNN.begin() + Nout * ( ip + 1 ), prep.begin() + Nout * ( ip - _Np ), dNN.begin() + Nout * ip, std::multiplies<T>());
+        }
+
+      return dNN;
     }
 
   private:
@@ -431,6 +592,9 @@ namespace nnad
     const std::function<T(T const&)>   _ActFun;
     const std::function<T(T const&)>   _dActFun;
     const OutputFunction               _OutputFunc;
+    const Preprocessing                _Preproc;
+    std::vector<T>                     _PreprocPars;
+    const int                          _NpPrep;
     std::function<T(T const&)>         _OutputActFun;
     std::function<T(T const&)>         _dOutputActFun;
     int                                _Np;
