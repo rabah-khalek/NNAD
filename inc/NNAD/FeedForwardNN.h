@@ -455,6 +455,14 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    std::vector<int> GetPreprocessingParameterIndices() const
+    {
+      std::vector<int> ind(_NpPrep);
+      std::iota(std::begin(ind), std::end(ind), _Np);
+      return ind;
+    }
+
+    //_________________________________________________________________________________
     std::vector<T> Evaluate(std::vector<T> const& Input) const
     {
       // Check that the size of the input vector is equal to the number of
