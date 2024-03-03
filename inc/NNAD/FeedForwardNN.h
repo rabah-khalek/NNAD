@@ -162,7 +162,7 @@ namespace nnad
 
           // Check that the number of outputs of the preprocessing
           // function is the same as that of the NN.
-          if (OutPrep.size() != ( _NpPrep + 1 ) * _Arch.back())
+          if ((int) OutPrep.size() != ( _NpPrep + 1 ) * _Arch.back())
             Error("FeedForwardNN: preprocessing function not well-formed.");
         }
 
