@@ -13,6 +13,7 @@
 #include <math.h>
 #include <iostream>
 #include <tuple>
+#include <algorithm>
 
 namespace nnad
 {
