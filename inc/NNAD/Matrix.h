@@ -18,16 +18,19 @@ namespace nnad
   {
   public:
     //_________________________________________________________________________________
-    Matrix()
+    Matrix():
+      _Lines(0),
+      _Columns(0),
+      _Matrix({})
     {
     }
 
     //_________________________________________________________________________________
-    Matrix(Matrix<T> const& M)
+    Matrix(Matrix<T> const& M):
+      _Lines(M.GetLines()),
+      _Columns(M.GetColumns()),
+      _Matrix(M.GetVector())
     {
-      _Lines   = M.GetLines();
-      _Columns = M.GetColumns();
-      _Matrix  = M.GetVector();
     }
 
     //_________________________________________________________________________________
