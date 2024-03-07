@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Matrix.h"
+#include "Distributions.h"
 
 #include <vector>
 #include <functional>
@@ -47,16 +48,20 @@ namespace nnad
   {
   public:
     //_________________________________________________________________________________
-    FeedForwardNN(std::vector<int>           const& Arch,
-                  int                        const& RandomSeed,
-                  bool                       const& Report = false,
-                  std::function<T(T const&)> const& ActFun = Sigmoid<T>,
-                  std::function<T(T const&)> const& dActFun = dSigmoid<T>,
-                  OutputFunction             const& OutputFunc = LINEAR):
+    FeedForwardNN(std::vector<int>                const& Arch,
+                  int                             const& RandomSeed,
+                  bool                            const& Report = false,
+                  std::function<T(T const&)>      const& ActFun = Sigmoid<T>,
+                  std::function<T(T const&)>      const& dActFun = dSigmoid<T>,
+                  OutputFunction                  const& OutputFunc = LINEAR,
+                  InitDistribution                const& InitDist = UNIFORM,
+                  std::vector<std::vector<T>>     const& DistParams = {}):
       _Arch(Arch),
       _ActFun(ActFun),
       _dActFun(dActFun),
-      _OutputFunc(OutputFunc)
+      _OutputFunc(OutputFunc),
+      _InitDist(InitDist),
+      _DistParams(DistParams)
     {
       // Number of layers
       const int nl = (int) _Arch.size();
@@ -82,8 +87,8 @@ namespace nnad
       int iseed = 0;
       for (int l = 1; l < nl; l++)
         {
-          _Links.insert({l, Matrix<T>{_Arch[l], _Arch[l - 1], sub_seeds.at(iseed++)}});
-          _Biases.insert({l, Matrix<T>{_Arch[l], 1, sub_seeds.at(iseed++)}});
+          _Links.insert({l, Matrix<T>{_Arch[l], _Arch[l - 1], sub_seeds.at(iseed++), InitDist, {}}});
+          _Biases.insert({l, Matrix<T>{_Arch[l], 1, sub_seeds.at(iseed++), InitDist, {}}});
           _Np += _Arch[l] * (_Arch[l - 1] + 1);
         }
 
@@ -138,6 +143,15 @@ namespace nnad
             std::cout << n << " ";
           std::cout << "]" << std::endl;
           std::cout << "- number of parameters = " << _Np << std::endl;
+          // Select distribution at initialisation
+          switch(_InitDist)
+            {
+            case UNIFORM:
+              std::cout << "- uniform distribution at initialisation" << std::endl;
+              break;
+            case GAUSSIAN:
+              std::cout << "- Gaussian distribution at initialisation" << std::endl;
+            }
           // Select integration method
           switch (_OutputFunc)
             {
@@ -439,5 +453,7 @@ namespace nnad
     std::map<int, coordinates>         _IntMap;
     std::map<std::string, coordinates> _StrMap;
     std::map<std::string, int>         _StrIntMap;
+    InitDistribution                   _InitDist;
+    std::vector<std::vector<T>>        _DistParams;
   };
 }

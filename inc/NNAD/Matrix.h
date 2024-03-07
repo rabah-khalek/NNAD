@@ -5,7 +5,9 @@
 
 #pragma once
 
+
 #include "Utilities.h"
+#include "Distributions.h"
 
 #include <vector>
 #include <functional>
@@ -31,23 +33,22 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    Matrix(int const& Lines, int const& Columns, int const& RandomSeed = -1):
+    Matrix(int              const& Lines,
+           int              const& Columns,
+           int              const& RandomSeed = -1,
+           InitDistribution const& InitDist = UNIFORM,
+           std::vector<T>   const& Params = {}
+          ):
       _Lines(Lines),
       _Columns(Columns),
       _Matrix(_Lines * _Columns)
     {
-      // Initialise random number generator.
-      srand(RandomSeed);
+      // Initialise the distribution for the entries of the matrix
+      Distribution<T> *d = DistributionFactory<T>(InitDist, Params, RandomSeed);
 
-      // Fill in the matrix with random numbers distributed in [-1:1]
+      // Fill the elements of the matrix
       for (int i = 0; i < _Lines * _Columns; i++)
-        {
-          double temp = 2e-2 * ( rand() % 100 ) - 1;
-          while(!temp)
-            temp = 2e-2 * ( rand() % 100 ) - 1;
-
-          _Matrix[i] = T(temp);
-        }
+        _Matrix[i] = d->Generate();
     }
 
     //_________________________________________________________________________________
@@ -425,8 +426,8 @@ namespace nnad
     }
 
   private:
-    int _Lines;
-    int _Columns;
-    std::vector<T> _Matrix;
+    int                               _Lines;
+    int                               _Columns;
+    std::vector<T>                    _Matrix;
   };
 }
