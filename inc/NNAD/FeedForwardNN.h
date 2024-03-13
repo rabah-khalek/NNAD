@@ -20,6 +20,9 @@ namespace nnad
   // Typedef for the coordinates of the NN parameters
   typedef std::tuple<bool, int, int, int> coordinates;
 
+  // Typedef for the learning tensor
+  typedef std::vector<std::map<double, double>> tensor;
+
   // Available output functions
   enum OutputFunction: int {ACTIVATION, LINEAR, QUADRATIC};
 
@@ -55,13 +58,15 @@ namespace nnad
                   std::function<T(T const&)>      const& dActFun = dSigmoid<T>,
                   OutputFunction                  const& OutputFunc = LINEAR,
                   InitDistribution                const& InitDist = UNIFORM,
-                  std::vector<std::vector<T>>     const& DistParams = {}):
+                  std::vector<std::vector<T>>     const& DistParams = {},
+                  bool                            const& NTKScaling = false):
       _Arch(Arch),
       _ActFun(ActFun),
       _dActFun(dActFun),
       _OutputFunc(OutputFunc),
       _InitDist(InitDist),
-      _DistParams(DistParams)
+      _DistParams(DistParams),
+      _NTKScaling(NTKScaling)
     {
       // Number of layers
       const int nl = (int) _Arch.size();
@@ -357,10 +362,19 @@ namespace nnad
       // Construct output of the NN recursively for the hidden layers
       Matrix<T> y{(int) Input.size(), 1, Input};
       for (int l = 1; l < nl - 1; l++)
-        y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
+        {
+          // NTK_FLAG
+          if (_NTKScaling)
+            y = y * T(T(1) / T(_Arch[l-1]));
+
+          y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
+        }
 
       // Now take care of the output layer according to the selected
       // output function.
+      // NTK_FLAG
+      if (_NTKScaling)
+        y = y * T(1 / _Arch[nl-2]);
       return (Matrix<T> {_Links.at(nl - 1) * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
     }
 
@@ -388,6 +402,9 @@ namespace nnad
       y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
       for (int l = 1; l < nl - 1; l++)
         {
+          // NTK_FLAG
+          if (_NTKScaling)
+              y.at(l - 1) = y.at(l - 1) * T(T(1) / T(_Arch[l - 1]));
           const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
@@ -395,6 +412,9 @@ namespace nnad
 
       // Now take care of the output layer according to the selected
       // output function.
+      // NTK_FLAG
+      if (_NTKScaling)
+          y.at(nl - 2) = y.at(nl - 2) * T(T(1) / T(_Arch[nl - 2]));
       const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
       y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
       z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
@@ -430,8 +450,16 @@ namespace nnad
           // Compute Matrix "S" on this layer
           std::vector<T> entries;
           for (int i = 0; i < _Arch[l]; i++)
-            for (int j = 0; j < _Arch[l - 1]; j++)
-              entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+            {
+              for (int j = 0; j < _Arch[l - 1]; j++)
+                {
+                  // NTK_FLAG
+                  if (_NTKScaling)
+                    entries.push_back(zl[i] * _Links.at(l).GetElement(i, j) / _Arch[l - 1]);
+                  else
+                    entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+                }
+            }
           const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
 
           // Update Matrix "Sigma" for the next step
@@ -455,5 +483,6 @@ namespace nnad
     std::map<std::string, int>         _StrIntMap;
     InitDistribution                   _InitDist;
     std::vector<std::vector<T>>        _DistParams;
+    bool                               _NTKScaling;
   };
 }
