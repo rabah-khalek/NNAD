@@ -48,7 +48,7 @@ namespace nnad
 
       // Fill the elements of the matrix
       for (int i = 0; i < _Lines * _Columns; i++)
-        _Matrix[i] = d->Generate();
+        _Matrix[i] = d->operator()();
     }
 
     //_________________________________________________________________________________

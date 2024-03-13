@@ -29,6 +29,7 @@ namespace nnad
      * drawn from the distribution resolved at initialisation.
      */
     T Generate() {return _distribution();}
+    T operator()() {return _distribution();}
 
   protected:
     std::function<T(void)>        _distribution;
