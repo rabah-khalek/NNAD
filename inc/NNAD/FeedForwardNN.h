@@ -365,7 +365,7 @@ namespace nnad
         {
           // NTK_FLAG
           if (_NTKScaling)
-            y = y * T(T(1) / T(_Arch[l-1]));
+            y = y * T(T(1) / T(sqrt(_Arch[l-1])));
 
           y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
         }
@@ -374,7 +374,7 @@ namespace nnad
       // output function.
       // NTK_FLAG
       if (_NTKScaling)
-        y = y * T(1 / _Arch[nl-2]);
+        y = y * T(T(1) / sqrt(_Arch[nl-2]));
       return (Matrix<T> {_Links.at(nl - 1) * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
     }
 
@@ -404,7 +404,7 @@ namespace nnad
         {
           // NTK_FLAG
           if (_NTKScaling)
-              y.at(l - 1) = y.at(l - 1) * T(T(1) / T(_Arch[l - 1]));
+              y.at(l - 1) = y.at(l - 1) * T(T(1) / T(sqrt(_Arch[l - 1])));
           const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
@@ -414,7 +414,7 @@ namespace nnad
       // output function.
       // NTK_FLAG
       if (_NTKScaling)
-          y.at(nl - 2) = y.at(nl - 2) * T(T(1) / T(_Arch[nl - 2]));
+          y.at(nl - 2) = y.at(nl - 2) * T(T(1) / T(sqrt(_Arch[nl - 2])));
       const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
       y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
       z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
@@ -455,7 +455,7 @@ namespace nnad
                 {
                   // NTK_FLAG
                   if (_NTKScaling)
-                    entries.push_back(zl[i] * _Links.at(l).GetElement(i, j) / _Arch[l - 1]);
+                    entries.push_back(zl[i] * _Links.at(l).GetElement(i, j) / sqrt(_Arch[l - 1]));
                   else
                     entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
                 }
