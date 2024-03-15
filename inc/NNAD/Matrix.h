@@ -307,7 +307,7 @@ namespace nnad
       if (_Lines != l || _Columns != c)
         Error("Lines or Columns don't match adding the two matrices.");
 
-      Matrix result{l, c};
+      Matrix result{l, c, std::vector<T>(l * c, T(0.))};
       for (int i = 0; i < l; i++)
         for (int j = 0; j < c; j++)
           result.SetElement(i, j, _Matrix[i * _Columns + j] + term.GetElement(i, j));
@@ -367,7 +367,7 @@ namespace nnad
       if (c1 != l2)
         Error("Lines or Columns don't match multiplying the two matrices.");
 
-      Matrix result{l1, c2};
+      Matrix result{l1, c2, std::vector<T>(l1 * c2, T(0.))};
       for (int i = 0; i < c2; i++)
         for (int j = 0; j < l1; j++)
           {
@@ -405,7 +405,7 @@ namespace nnad
     //_________________________________________________________________________________
     Matrix<T> operator * (T const& coef)
     {
-      Matrix result{_Lines, _Columns};
+      Matrix result{_Lines, _Columns, std::vector<T>(_Lines * _Columns, T(0.))};
       for (int i = 0; i < _Lines; i++)
         for (int j = 0; j < _Columns; j++)
           result.SetElement(i, j, coef * _Matrix[i * _Columns + j]);
