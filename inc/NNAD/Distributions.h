@@ -59,7 +59,7 @@ namespace nnad
     {
       this->_seed = RandomSeed;
       this->_g = std::default_random_engine(this->_seed);
-      std::uniform_real_distribution<T> _d (_min, _max);
+      _d = std::uniform_real_distribution<T> (_min, _max);
       this->_distribution = std::function<T(void)> ( [&] () {return this->_d(this->_g);});
     }
 
@@ -90,7 +90,7 @@ namespace nnad
     {
       this->_seed = RandomSeed;
       this->_g = std::default_random_engine(this->_seed);
-      std::normal_distribution<T> _d (_mean, _stddev);
+      _d = std::normal_distribution<T> (_mean, _stddev);
       this->_distribution = std::function<T(void)> ( [&] () {return this->_d(this->_g);});
     }
 
