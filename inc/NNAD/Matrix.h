@@ -366,16 +366,14 @@ namespace nnad
       if (c1 != l2)
         Error("Lines or Columns don't match multiplying the two matrices.");
 
-      Matrix result{l1, c2};
-      for (int i = 0; i < c2; i++)
-        for (int j = 0; j < l1; j++)
-          {
-            T value = T(0);
-            for (int k = 0; k < c1; k++)
-              value += _Matrix[j * _Columns + k] * term.GetElement(k, i);
+        std::vector<T> C ( l1 * c2, T(0) );
 
-            result.SetElement(j, i, value);
-          }
+        for (size_t row = 0; row < l1; row++)
+          for (size_t col = 0; col < c2; col++)
+            for (size_t k = 0; k < c1; k++)
+              C[row * c2 + col] += _Matrix[row * _Columns + k] * term(int(k), int(col));
+
+        Matrix result{l1, c2, C};
 
       return result;
     }
@@ -410,6 +408,12 @@ namespace nnad
           result.SetElement(i, j, coef * _Matrix[i * _Columns + j]);
 
       return result;
+    }
+
+    //_________________________________________________________________________________
+    T operator() (int const& row, int const& col) const
+    {
+      return _Matrix[row * _Columns + col];
     }
 
     //_________________________________________________________________________________
