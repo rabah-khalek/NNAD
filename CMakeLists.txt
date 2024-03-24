@@ -15,6 +15,12 @@ endif()
 # The project name
 project(NNAD CXX)
 
+# OpenMP
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(MyTarget PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 
 # Activating some global properties for the project

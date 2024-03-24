@@ -368,6 +368,7 @@ namespace nnad
 
         std::vector<T> C ( l1 * c2, T(0) );
 
+        #pragma omp parallel for
         for (size_t row = 0; row < l1; row++)
           for (size_t col = 0; col < c2; col++)
             for (size_t k = 0; k < c1; k++)
