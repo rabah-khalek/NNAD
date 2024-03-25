@@ -405,6 +405,7 @@ namespace nnad
           // NTK_FLAG
           if (_NTKScaling)
               y.at(l - 1) = y.at(l - 1) * T(T(1) / T(sqrt(_Arch[l - 1])));
+
           const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
@@ -412,9 +413,11 @@ namespace nnad
 
       // Now take care of the output layer according to the selected
       // output function.
+
       // NTK_FLAG
       if (_NTKScaling)
           y.at(nl - 2) = y.at(nl - 2) * T(T(1) / T(sqrt(_Arch[nl - 2])));
+
       const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
       y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
       z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
@@ -477,14 +480,16 @@ namespace nnad
       // Compute the NTK in the first layer
 
       // Initialise the NTK with zeros
-      Matrix<T> H_ab {_Arch[1], _Arch[1], std::vector<T>(_Arch[1] * _Arch[1], T(0.))};
+      Matrix<T> H_ab {_Arch[1], _Arch[1], std::vector<T>(_Arch[1] * _Arch[1], T(0.))}; // H^{1}
 
       // Compute the diagonal element
       Matrix<T> ya{(int) Input_b.size(), 1, Input_a};
       Matrix<T> yb{(int) Input_b.size(), 1, Input_b};
-      Matrix<T> dya{(int) Input_b.size(), 1, std::vector<T>((int) Input_a.size(), T(0.))};
-      Matrix<T> dyb{(int) Input_b.size(), 1, std::vector<T>((int) Input_b.size(), T(0.))};
+      Matrix<T> za{(int) Input_b.size(), 1, std::vector<T>((int) Input_a.size(), T(0.))};
+      Matrix<T> zb{(int) Input_b.size(), 1, std::vector<T>((int) Input_b.size(), T(0.))};
+
       T D = std::inner_product(std::begin(Input_a), std::end(Input_a), std::begin(Input_b), T(0.0));
+
       // NTK_FLAG
       D = T(1.) + D / ( _NTKScaling ? T(_Arch[0]) : T(1.));
 
@@ -496,48 +501,81 @@ namespace nnad
       // NTK in the last layer
       for (int l = 1; l < nl - 1; l++)
         {
-          std::cout << "Loop : " << l << std::endl;
-
           // NTK_FLAG
-          if (_NTKScaling)
+          if (_NTKScaling) {
             ya = ya * T(T(1) / T(sqrt(_Arch[l-1])));
+            yb = yb * T(T(1) / T(sqrt(_Arch[l-1])));
 
-          dya = Matrix<T> {_Links.at(l) * ya + _Biases.at(l), _dActFun};
-          dyb = Matrix<T> {_Links.at(l) * yb + _Biases.at(l), _dActFun};
-          ya = Matrix<T> {_Links.at(l) * ya + _Biases.at(l), _ActFun};
-          yb = Matrix<T> {_Links.at(l) * yb + _Biases.at(l), _ActFun};
+          }
+
+          const Matrix<T> phi_l_a = _Links.at(l) * ya + _Biases.at(l);
+          const Matrix<T> phi_l_b = _Links.at(l) * yb + _Biases.at(l);
+
+          ya = Matrix<T> {phi_l_a, _ActFun}; // rho_l_a
+          yb = Matrix<T> {phi_l_b, _ActFun}; // rho_l_b
+          za = Matrix<T> {phi_l_a, _dActFun};
+          zb = Matrix<T> {phi_l_b, _dActFun};
 
           // Compute the diagonal part of the equation
           std::vector<T> yav = ya.GetVector();
           std::vector<T> ybv = yb.GetVector();
           D = std::inner_product(std::begin(yav), std::end(yav), std::begin(ybv), T(0.0));
+
           // NTK_FLAG
           D = T(1.) + D / ( _NTKScaling ? T(_Arch[l]) : T(1.));
 
-          // Compute the other contribution
-          for (int ia = 0; ia < H_ab.GetLines(); ia++)
-            {
-              for (int ib = 0; ib < H_ab.GetColumns(); ib++)
-                {
-                  T Hbar = dya.GetElement(ia,0) * dyb.GetElement(ib,0) * H_ab.GetElement(ia,ib);
+          // Compute the non-diagonal contribution
+          for (int ia = 0; ia < H_ab.GetLines(); ia++){
+              for (int ib = 0; ib < H_ab.GetColumns(); ib++){
+                  T Hbar = za.GetElement(ia,0) * zb.GetElement(ib,0) * H_ab.GetElement(ia,ib);
                   H_ab.SetElement(ia, ib, Hbar);
                 }
             }
+
           Matrix<T> WT{_Links.at(l+1)};
           WT.Transpose();
-          H_ab = Matrix<T> {_Links.at(l+1) * H_ab * WT};
+          Matrix<T> Maux = H_ab * WT;
+          H_ab = Matrix<T> {_Links.at(l+1) * Maux};
 
           // NTK_FLAG
           if (_NTKScaling)
             H_ab = H_ab * T(T(1) / T(_Arch[l]));
 
           // Fill the diagonal entries of the NTK
-          for (int i = 0; i < H_ab.GetLines(); i++)
-            H_ab.SetElement(i,i, H_ab.GetElement(i,i) + D);
+          for (int i = 0; i < H_ab.GetLines(); i++){
+            T aux = H_ab.GetElement(i,i) + D;
+            H_ab.SetElement(i,i, aux);
+          }
         }
 
       return H_ab;
     }
+
+  Matrix<T> NTK_2 (std::vector<T> const& Input_a, std::vector<T> const& Input_b) const
+  {
+    const std::vector<double> dnnx_a = Derive(Input_a);
+    const std::vector<double> dnnx_b = Derive(Input_b);
+
+    const int Nout = _Arch.back();
+    Matrix<T> H_ab {Nout, Nout, std::vector<T>(Nout *  Nout, T(0.))};
+
+    //std::cout << "DEBUG NTK 2" << std::endl;
+
+    for (int i = 0; i < Nout; i++){
+      for (int j = 0; j < Nout; j++){
+        T aux = T(0);
+        for (int k = 1; k < _Np + 1; k++) {
+          //std::cout << "Printing derivatives" << std::endl;
+          //std::cout << k << "\t" << dnnx_a[i + k * Nout] << "\t" << dnnx_b[j + k * Nout] << std::endl;
+          aux += dnnx_a[i + k * Nout] * dnnx_b[j + k * Nout];
+        }
+        std::cout << std::endl;
+        H_ab.SetElement(i,j,aux);
+      }
+    }
+
+    return H_ab;
+  }
 
   private:
     const std::vector<int>             _Arch;
