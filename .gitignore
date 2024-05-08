@@ -46,3 +46,6 @@ doc/html
 
 # Executables of the test programs
 tests/TestDerivatives
+
+# VScode
+.vscode
