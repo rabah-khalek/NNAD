@@ -200,6 +200,20 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    // Copy constructor
+    FeedForwardNN(FeedForwardNN<T> *NN):
+      FeedForwardNN(NN->_Arch, 0, false,
+                    NN->GetActivationFunction(),
+                    NN->GetDerActivationFunction(),
+                    NN->OutputFunctionType(),
+                    NN->GetInitDistribution(),
+                    {},
+                    NN->GetInitNTKScaling())
+    {
+      SetParameters(NN->GetParameters());
+    }
+
+    //_________________________________________________________________________________
     void SetParameters(std::vector<T> const& Pars)
     {
       // Number of parameters
@@ -270,6 +284,18 @@ namespace nnad
     OutputFunction OutputFunctionType() const
     {
       return _OutputFunc;
+    }
+
+    //_________________________________________________________________________________
+    InitDistribution GetInitDistribution() const
+    {
+      return _InitDist;
+    }
+
+    //_________________________________________________________________________________
+    bool GetInitNTKScaling() const
+    {
+      return _NTKScaling;
     }
 
     //_________________________________________________________________________________
@@ -565,8 +591,6 @@ namespace nnad
       for (int j = 0; j < Nout; j++){
         T aux = T(0);
         for (int k = 1; k < _Np + 1; k++) {
-          //std::cout << "Printing derivatives" << std::endl;
-          //std::cout << k << "\t" << dnnx_a[i + k * Nout] << "\t" << dnnx_b[j + k * Nout] << std::endl;
           aux += dnnx_a[i + k * Nout] * dnnx_b[j + k * Nout];
         }
         std::cout << std::endl;
