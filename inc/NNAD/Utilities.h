@@ -11,6 +11,16 @@
 
 namespace nnad
 {
+  template<typename T> T Linear(T const &x)
+  {
+    return x;
+  }
+
+  template <typename T> T dLinear(T const &x)
+  {
+    return T(1);
+  }
+
   template<typename T> T Sigmoid(T const &x)
   {
     return T(1) / (T(1) + exp(-x));
