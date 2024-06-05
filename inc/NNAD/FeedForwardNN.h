@@ -585,15 +585,27 @@ namespace nnad
     const int Nout = _Arch.back();
     Matrix<T> H_ab {Nout, Nout, std::vector<T>(Nout *  Nout, T(0.))};
 
-    //std::cout << "DEBUG NTK 2" << std::endl;
 
+    // Derive returns a std::vector for the output derivatives
+    // organised in row-major oder. This means that
+    //
+    //          d_k f_i (x_a) = df [i + k * Nout] (x_a).
+    //
+    // This means that the tensor df can be viewed as
+    //
+    //          | d_1 f_1   d_1 f_1   ...   d_1 f_Nout  |
+    //          | d_2 f_2        ...        d_2 f_Nout  |
+    //          |    .                                  |
+    //     df = |    .                                  |
+    //          |    .                                  |
+    //          | d_Np f1        ...        d_Np f_Nout |
+    //
     for (int i = 0; i < Nout; i++){
       for (int j = 0; j < Nout; j++){
         T aux = T(0);
         for (int k = 1; k < _Np + 1; k++) {
           aux += dnnx_a[i + k * Nout] * dnnx_b[j + k * Nout];
         }
-        std::cout << std::endl;
         H_ab.SetElement(i,j,aux);
       }
     }
