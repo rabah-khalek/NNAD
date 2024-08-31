@@ -99,7 +99,7 @@ namespace nnad
             _StrIntMap.insert({name, count});
             _IntMap.insert({count, coord});
             _StrMap.insert({name, coord});
-	    _IntStrMap.insert({count++, name});
+            _IntStrMap.insert({count++, name});
 
             // Links
             for (int j = 0; j < _Arch[l - 1]; j++)
@@ -109,7 +109,7 @@ namespace nnad
                 _StrIntMap.insert({name, count});
                 _IntMap.insert({count, coord});
                 _StrMap.insert({name, coord});
-		_IntStrMap.insert({count++, name});
+                _IntStrMap.insert({count++, name});
               }
           }
 
