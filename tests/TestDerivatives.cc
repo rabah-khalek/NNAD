@@ -25,13 +25,21 @@ int main()
     std::cout << e << " ";
   std::cout << "}\n" << std::endl;
 
+  // Print parameters along with their label
+  const std::vector<double> pars = nn.GetParameters();
+  const std::map<int, std::string> strmap = nn.GetIntStrMap();
+  std::cout << std::scientific;
+  std::cout << "Parameters index - name - value:\n";
+  for (int i = 0; i < (int) pars.size(); i++)
+    std::cout << i << "\t" << strmap.at(i) << "\t\t" << pars[i] << std::endl;
+  std::cout << "\n";
+
   // Get NN at x
   std::vector<double> ders = nn.Evaluate(x);
   const std::vector<double> lin = nnl.Evaluate(x);
 
   // Compute the derivatives numerically as incremental ratios
   const double eps = 1e-5;
-  const std::vector<double> pars = nn.GetParameters();
   const int np = (int) pars.size();
 
   // Loop over all derivatives
@@ -66,7 +74,6 @@ int main()
   // Compare derivatives
   const std::vector<double> anders = nn.Derive(x);
   const int nd = (int) anders.size();
-  std::cout << std::scientific;
   std::cout << "id\t num. ders.\t an. ders.\t   ratio" << std::endl;
   for (int id = 0; id < nd; id++)
     std::cout << id << "\t" << ders[id] << "\t" << anders[id] << "\t" << ( anders[id] == 0 ? 0 : ders[id] / anders[id] ) << std::endl;

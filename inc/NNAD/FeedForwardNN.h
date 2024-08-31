@@ -97,8 +97,9 @@ namespace nnad
             const coordinates coord = std::make_tuple(false, l, i, 0);
             const std::string name = "B_" + std::to_string(l) + "_" + std::to_string(i);
             _StrIntMap.insert({name, count});
-            _IntMap.insert({count++, coord});
+            _IntMap.insert({count, coord});
             _StrMap.insert({name, coord});
+	    _IntStrMap.insert({count++, name});
 
             // Links
             for (int j = 0; j < _Arch[l - 1]; j++)
@@ -106,8 +107,9 @@ namespace nnad
                 const coordinates coord = std::make_tuple(true, l, i, j);
                 const std::string name = "L_" + std::to_string(l) + "_" + std::to_string(i) + "_" + std::to_string(j);
                 _StrIntMap.insert({name, count});
-                _IntMap.insert({count++, coord});
+                _IntMap.insert({count, coord});
                 _StrMap.insert({name, coord});
+		_IntStrMap.insert({count++, name});
               }
           }
 
@@ -302,6 +304,12 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    std::map<int, std::string> GetIntStrMap() const
+    {
+      return _IntStrMap;
+    }
+
+    //_________________________________________________________________________________
     std::vector<T> GetParameters() const
     {
       // Initialise output vector.
@@ -439,5 +447,6 @@ namespace nnad
     std::map<int, coordinates>         _IntMap;
     std::map<std::string, coordinates> _StrMap;
     std::map<std::string, int>         _StrIntMap;
+    std::map<int, std::string>         _IntStrMap;
   };
 }
