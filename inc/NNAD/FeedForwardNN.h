@@ -27,13 +27,13 @@ namespace nnad
    * @brief the FeedForwardNN class evaluates a feed-forward NN and
    * its derivatives for each of the free parameters. The function
    * "Derive" returns a vector that contains as many vectors as free
-   * parameters of the NN (links and biases) plus one times the number
-   * of output nodes (say "Nout"). The first "Nout" elements of the
-   * vector returned by "Derive" coincide with the output of
+   * parameters of the NN (links and biases) plus one, times the
+   * number of output nodes (say "Nout"). The first "Nout" elements of
+   * the vector returned by "Derive" coincide with the output of
    * "Evaluate", i.e. to the NN itself evaluated at some "x". The
    * following elements correspond to the derivative w.r.t. the free
    * parameters computed at "x". The ordering of the derivatives is a
-   * little weird, this is a consequence of the way the backward
+   * little weird: this is a consequence of the way the backward
    * propagation algorithm works. They start from the output layer and
    * proceed backward to the first hidden layer (the input layer is
    * assumed to have no free parameters). For each layer, the index
@@ -43,11 +43,10 @@ namespace nnad
    * all derivatives w.r.t. the links "omega_{ij}", for all accessible
    * values of "j".
    *
-   * More recently, we have introduced the possibility to provide the
-   * NN with an arbitrary preprocessing function that can depend on
-   * any number of parameters. The resulting derivative also accouns
-   * for this additional function. This new functionality is backward
-   * compatible.
+   * The current version of the code also allows the user to provide
+   * the NN with an arbitrary preprocessing function that can depend
+   * on any number of parameters. The resulting derivative also
+   * accounts for this additional function.
    */
   template<class T>
   class FeedForwardNN
@@ -441,7 +440,7 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    std::vector<T> GetNueralNetworkParameters() const
+    std::vector<T> GetNeuralNetworkParameters() const
     {
       // Initialise output vector.
       std::vector<T> output(_Np);
@@ -464,7 +463,6 @@ namespace nnad
             for (int j = 0; j < _Arch[l - 1]; j++)
               output[count++] = _Links.at(l).GetElement(i, j);
           }
-
       return output;
     }
 
@@ -507,7 +505,6 @@ namespace nnad
           const std::vector<T> prep = _Preproc(Input, _PreprocPars);
           std::transform(NN.begin(), NN.end(), prep.begin(), NN.begin(), std::multiplies<T>());
         }
-
       return NN;
     }
 
@@ -611,7 +608,6 @@ namespace nnad
           for (int ip = _Np + 1; ip < _Np + _NpPrep + 1; ip++)
             std::transform(dNN.begin() + Nout * ip, dNN.begin() + Nout * ( ip + 1 ), prep.begin() + Nout * ( ip - _Np ), dNN.begin() + Nout * ip, std::multiplies<T>());
         }
-
       return dNN;
     }
 
