@@ -51,7 +51,7 @@ int main()
   // Square and include preprocessing function
   std::vector<double> ders;
   for (int io = 0; io < arch.back(); io++)
-    ders.push_back(pow(nnl[io], 2) * prepf[io]);
+    ders.push_back(nnp.GetOutputFunction()(nnl[io]) * prepf[io]);
 
   // Loop over all derivatives w.r.t the NN parameters
   for (int ip = 0; ip < np; ip++)
@@ -66,15 +66,15 @@ int main()
         }
 
       // Define NNs with the displaced parameters.
-      const nnad::FeedForwardNN<double> nnp{arch, parsp};
-      const nnad::FeedForwardNN<double> nnm{arch, parsm};
+      const nnad::FeedForwardNN<double> nnpl{arch, parsp};
+      const nnad::FeedForwardNN<double> nnmn{arch, parsm};
 
       // Get outputs and compute the derivative numerically
-      const std::vector<double> vp = nnp.Evaluate(x);
-      const std::vector<double> vm = nnm.Evaluate(x);
+      const std::vector<double> vp = nnpl.Evaluate(x);
+      const std::vector<double> vm = nnmn.Evaluate(x);
 
       for (int io = 0; io < arch.back(); io++)
-        ders.push_back(2 * nnl[io] * ( vp[io] - vm[io] ) / 2 / eps / pars[ip] * prepf[io]);
+        ders.push_back(nnp.GetDerOutputFunction()(nnl[io]) * ( vp[io] - vm[io] ) / 2 / eps / pars[ip] * prepf[io]);
     }
 
   // Now include derivatives w.r.t. the preprocessing parameters
@@ -94,7 +94,7 @@ int main()
       const std::vector<double> vm = Preproc(x, parsm);
 
       for (int io = 0; io < arch.back(); io++)
-        ders.push_back(pow(nnl[io], 2) * ( vp[io] - vm[io] ) / 2 / eps / parsprep[ip]);
+        ders.push_back(nnp.GetOutputFunction()(nnl[io]) * ( vp[io] - vm[io] ) / 2 / eps / parsprep[ip]);
     }
 
   // Compare derivatives

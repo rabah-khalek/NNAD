@@ -63,12 +63,7 @@ int main()
       const std::vector<double> vm = nnm.Evaluate(x);
 
       for (int io = 0; io < arch.back(); io++)
-        if (nn.OutputFunctionType() == nnad::OutputFunction::LINEAR)
-          ders.push_back(( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
-        else if (nn.OutputFunctionType() == nnad::OutputFunction::QUADRATIC)
-          ders.push_back(2 * lin[io] * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
-        else if (nn.OutputFunctionType() == nnad::OutputFunction::ACTIVATION)
-          ders.push_back(nn.GetDerActivationFunction()(lin[io]) * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
+        ders.push_back(nn.GetDerOutputFunction()(lin[io]) * ( vp[io] - vm[io] ) / 2 / eps / pars[ip]);
     }
 
   // Compare derivatives

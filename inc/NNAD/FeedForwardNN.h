@@ -68,13 +68,15 @@ namespace nnad
                   bool                       const& Report = false,
                   std::function<T(T const&)> const& ActFun = Sigmoid<T>,
                   std::function<T(T const&)> const& dActFun = dSigmoid<T>,
-                  OutputFunction             const& OutputFunc = LINEAR,
+                  std::function<T(T const&)> const& OutputActFun = Linear<T>,
+                  std::function<T(T const&)> const& dOutputActFun = dLinear<T>,
                   Preprocessing              const& Preproc = nullptr,
                   std::vector<T>             const& PreprocPars = {}):
       _Arch(Arch),
       _ActFun(ActFun),
       _dActFun(dActFun),
-      _OutputFunc(OutputFunc),
+      _OutputActFun(OutputActFun),
+      _dOutputActFun(dOutputActFun),
       _Preproc(Preproc),
       _PreprocPars(_Preproc == nullptr ? std::vector<T> {} : PreprocPars),
       _NpPrep((int) _PreprocPars.size())
@@ -134,24 +136,6 @@ namespace nnad
               }
           }
 
-      // Define activation function of the output nodes and its
-      // derivative.
-      switch (_OutputFunc)
-        {
-        case ACTIVATION:
-          _OutputActFun  = _ActFun;
-          _dOutputActFun = _dActFun;
-          break;
-        case LINEAR:
-          _OutputActFun  = [] (T const& x) -> T { return x; };
-          _dOutputActFun = [] (T const&)   -> T { return T{1}; };
-          break;
-        case QUADRATIC:
-          _OutputActFun  = [] (T const& x) -> T { return x * x; };
-          _dOutputActFun = [] (T const& x) -> T { return 2 * x; };
-          break;
-        }
-
       // Check sanity of preprocessing function, if present
       if (_Preproc != nullptr)
         {
@@ -184,23 +168,44 @@ namespace nnad
             }
           else
             std::cout << "- number of parameters = " << _Np << std::endl;
-          std::cout << "- NN output function: ";
-          switch (_OutputFunc)
-            {
-            case ACTIVATION:
-              std::cout << "activation-like" << std::endl;
-              break;
-            case LINEAR:
-              std::cout << "linear" << std::endl;
-              break;
-            case QUADRATIC:
-              std::cout << "quadratic" << std::endl;
-              break;
-            default:
-              std::cout << "unknown" << std::endl;
-              Error("FeedForwardNN: Unknown output function.");
-            }
-          std::cout << "\n";
+        }
+    }
+
+    //_________________________________________________________________________________
+    FeedForwardNN(std::vector<int>           const& Arch,
+                  int                        const& RandomSeed,
+                  bool                       const& Report = false,
+                  std::function<T(T const&)> const& ActFun = Sigmoid<T>,
+                  std::function<T(T const&)> const& dActFun = dSigmoid<T>,
+                  OutputFunction             const& OutputFunc = LINEAR,
+                  Preprocessing              const& Preproc = nullptr,
+                  std::vector<T>             const& PreprocPars = {}):
+      FeedForwardNN(Arch, RandomSeed, Report, ActFun, dActFun, dLinear<T>, dLinear<T>, Preproc, PreprocPars)
+    {
+      // Define activation function of the output nodes and its
+      // derivative.
+      switch (OutputFunc)
+        {
+        case ACTIVATION:
+          _OutputActFun  = _ActFun;
+          _dOutputActFun = _dActFun;
+          if (Report)
+            std::cout << "- NN output function: activation\n\n";
+          break;
+        case LINEAR:
+          _OutputActFun  = Linear<T>;
+          _dOutputActFun = dLinear<T>;
+          if (Report)
+            std::cout << "- NN output function: linear\n\n";
+          break;
+        case QUADRATIC:
+          _OutputActFun  = Quadratic<T>;
+          _dOutputActFun = dQuadratic<T>;
+          if (Report)
+            std::cout << "- NN output function: quadratic\n\n";
+          break;
+        default:
+          Error("FeedForwardNN: Unknown output function.");
         }
     }
 
@@ -321,12 +326,6 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
-    OutputFunction OutputFunctionType() const
-    {
-      return _OutputFunc;
-    }
-
-    //_________________________________________________________________________________
     Preprocessing PreprocessingFunction() const
     {
       return _Preproc;
@@ -342,6 +341,18 @@ namespace nnad
     std::function<T(T const&)> GetDerActivationFunction() const
     {
       return _dActFun;
+    }
+
+    //_________________________________________________________________________________
+    std::function<T(T const&)> GetOutputFunction() const
+    {
+      return _OutputActFun;
+    }
+
+    //_________________________________________________________________________________
+    std::function<T(T const&)> GetDerOutputFunction() const
+    {
+      return _dOutputActFun;
     }
 
     //_________________________________________________________________________________
@@ -605,13 +616,12 @@ namespace nnad
     }
 
   private:
-    const std::vector<int>             _Arch;
-    const std::function<T(T const&)>   _ActFun;
-    const std::function<T(T const&)>   _dActFun;
-    const OutputFunction               _OutputFunc;
-    const Preprocessing                _Preproc;
+    std::vector<int>             const _Arch;
+    std::function<T(T const&)>   const _ActFun;
+    std::function<T(T const&)>   const _dActFun;
+    Preprocessing                const _Preproc;
     std::vector<T>                     _PreprocPars;
-    const int                          _NpPrep;
+    int                          const _NpPrep;
     std::function<T(T const&)>         _OutputActFun;
     std::function<T(T const&)>         _dOutputActFun;
     int                                _Np;
