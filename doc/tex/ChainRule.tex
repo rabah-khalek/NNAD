@@ -117,6 +117,7 @@ Let us first focus on Eq.~(\ref{eq:deromega}). We define:
   \\
   \displaystyle z_i^{(\ell)} = \sigma'_\ell\left(x_i^{(\ell)}\right)\,,
 \end{array}
+\label{eq:definitions}
 \end{equation}
 so that we can apply the chain rule:
 \begin{equation}
@@ -214,6 +215,27 @@ the compact result:
 or, making the indices explicit:
 \begin{equation}
 \frac{\partial N_k}{\partial \xi_p} = \Sigma_{kp}^{(0)}\,.
+\end{equation}
+
+A generalisation of feed-forward neural network that might be useful
+considering is one in which the linear combination of weights, biases,
+and inputs form the preceding layer that enter the computation of a
+given node (see first identity of Eq.~(\ref{eq:definitions})) is
+replaced by:
+\begin{equation}
+  \displaystyle x_i^{(\ell)} =
+  \sum_{j=1}^{N_{\ell-1}}f(\omega_{ij}^{(\ell)})y_{j}^{(\ell-1)}+\theta_{i}^{(\ell)}\,,
+\end{equation}
+where $f$ is some derivable function. This change has the effect of
+changing the matrices $\mathbf{S}^{(\ell)}$ as follows:
+\begin{equation}
+S_{ij}^{(\ell)} = z_i^{(\ell)}f(\omega_{ij}^{(\ell)})\,,
+\end{equation}
+and the derivatives w.r.t. the weight $\omega_{ij}^{(\ell)}$ as
+follows:
+\begin{equation}
+  \frac{\partial N_k}{\partial \omega_{ij}^{(\ell)}} ={\Sigma}_{ki}^{(\ell)}
+  z_i^{(\ell)} y_j^{(\ell-1)}f'(\omega_{ij}^{(\ell)})\,.
 \end{equation}
 
 

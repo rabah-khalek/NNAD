@@ -319,6 +319,15 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    void SetLinkFunction(std::function<T(T const&)> const& Fw, std::function<T(T const&)> const& dFw)
+    {
+      // Set weight function, i.e. the function that processes the
+      // links, and it derivative
+      _Fw  = Fw;
+      _dFw = dFw;
+    }
+
+    //_________________________________________________________________________________
     std::vector<int> GetArchitecture() const
     {
       return _Arch;
@@ -494,10 +503,10 @@ namespace nnad
       // Construct output of the NN recursively for the hidden layers
       Matrix<T> y{(int) Input.size(), 1, Input};
       for (int l = 1; l < nl - 1; l++)
-        y = Matrix<T> {_Links.at(l) * y + _Biases.at(l), _ActFun};
+        y = Matrix<T> {Matrix<T> {_Links.at(l), _Fw} * y + _Biases.at(l), _ActFun};
 
       // Compute NN
-      std::vector<T> NN = (Matrix<T> {_Links.at(nl - 1) * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
+      std::vector<T> NN = (Matrix<T> {Matrix<T> {_Links.at(nl - 1), _Fw} * y + _Biases.at(nl - 1), _OutputActFun}).GetVector();
 
       // Include preprocessing function if necessary
       if (_Preproc != nullptr)
@@ -532,14 +541,14 @@ namespace nnad
       y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
       for (int l = 1; l < nl - 1; l++)
         {
-          const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
+          const Matrix<T> M = Matrix<T> {_Links.at(l), _Fw}  * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
         }
 
       // Now take care of the output layer according to the selected
       // output function.
-      const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
+      const Matrix<T> M = Matrix<T> {_Links.at(nl - 1), _Fw} * y.at(nl - 2) + _Biases.at(nl - 1);
       y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
       z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
 
@@ -568,14 +577,14 @@ namespace nnad
               // Compute derivatives w.r.t. the links
               for (int j = 0; j < _Arch[l - 1]; j++)
                 for (int k = 0; k < _Arch[nl - 1]; k++)
-                  dNN[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j];
+                  dNN[count++] = Sigma.GetElement(k, i) * zl[i] * ylmo[j] * _dFw(_Links.at(l).GetElement(i, j));
             }
 
           // Compute Matrix "S" on this layer
           std::vector<T> entries;
           for (int i = 0; i < _Arch[l]; i++)
             for (int j = 0; j < _Arch[l - 1]; j++)
-              entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+              entries.push_back(zl[i] * _Fw(_Links.at(l).GetElement(i, j)));
           const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
 
           // Update Matrix "Sigma" for the next step
@@ -633,14 +642,14 @@ namespace nnad
       y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
       for (int l = 1; l < nl - 1; l++)
         {
-          const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
+          const Matrix<T> M = Matrix<T> {_Links.at(l), _Fw} * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
         }
 
       // Now take care of the output layer according to the selected
       // output function.
-      const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
+      const Matrix<T> M = Matrix<T> {_Links.at(nl - 1), _Fw} * y.at(nl - 2) + _Biases.at(nl - 1);
       y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
       z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
 
@@ -658,7 +667,7 @@ namespace nnad
           std::vector<T> entries;
           for (int i = 0; i < _Arch[l]; i++)
             for (int j = 0; j < _Arch[l - 1]; j++)
-              entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+              entries.push_back(zl[i] * _Fw(_Links.at(l).GetElement(i, j)));
           const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
 
           // Update Matrix "Sigma" for the next step
@@ -676,6 +685,8 @@ namespace nnad
     int                          const _NpPrep;
     std::function<T(T const&)>         _OutputActFun;
     std::function<T(T const&)>         _dOutputActFun;
+    std::function<T(T const&)>         _Fw = Linear<T>;
+    std::function<T(T const&)>         _dFw = dLinear<T>;
     int                                _Np;
     std::map<int, Matrix<T>>           _Links;
     std::map<int, Matrix<T>>           _Biases;
