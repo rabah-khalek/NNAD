@@ -1,0 +1,220 @@
+%% LyX 2.0.3 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[twoside,english]{paper}
+\usepackage{lmodern}
+\renewcommand{\ttdefault}{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=2.5cm,lmargin=2cm,rmargin=2cm}
+\usepackage{color}
+\usepackage{babel}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{esint}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=false]
+ {hyperref}
+\usepackage{breakurl}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{babel}
+
+\@ifundefined{showcaptionsetup}{}{%
+ \PassOptionsToPackage{caption=false}{subfig}}
+\usepackage{subfig}
+\makeatother
+
+\begin{document}
+
+\title{Backward propagation with Mellin convolutions}
+
+\maketitle
+
+\section{Derivative of the $\chi^2$}
+
+For the sake of simplicity we consider an uncorrelated $\chi^2$ for
+one single experimental point with central value $F$ and standard
+deviation $\sigma$:
+\begin{equation}
+\chi^2 = \left(\frac{\hat{F}-F}{\sigma}\right)^2\,,
+\end{equation}
+where $\hat{F}$ is the corresponding theoretical prediction. $\hat{F}$
+is typically computed as a convolution integral between two distinct
+sets of quantities $C_i$ and $N_i$:
+\begin{equation}
+\hat{F}\equiv \sum_i C_i \otimes N_i = \mathbf{C}\otimes\mathbf{N}\,,
+\end{equation}
+The details of the convolution sign $\otimes$ are not important, it
+suffices to know that it involves an integral over a set of input
+variables $\{\xi_p\}$. Therefore, the theoretical prediction $\hat{F}$
+can be regarded as a \textit{functional} of the functions
+$N_i$\footnote{In fact, $\hat{F}$ is also a functional of the
+  functions $C_i$ but we assume these functions to be given.},
+\textit{i.e.}  $\hat{F}\equiv \hat{F}[\{N_i\}]$. It follows that the
+$\chi^2$ is also a functional of the functions $N_i$, \textit{i.e.}
+$\chi^2\equiv \chi^2[\{N_i\}]$. In the case we are interested in, the
+functions $N_i$ are the outputs of a feed-forward neural network with
+$L$ layers (including input and output layers) parametrised by a set
+of weights $\omega_{ij}^{(\ell)}$ and biases $\theta_{i}^{(\ell)}$. We
+assume that the nodes of the $\ell$-th layer have all the same
+activation function $\sigma_\ell$ associated. The output of the neural
+network can be written as:
+\begin{equation}
+\begin{array}{rcl}
+\displaystyle N_i\equiv
+  N_i(\{\xi_p\};\{\omega_{ij}^{(\ell)},\theta_{i}^{(\ell)}\}) &=&\displaystyle
+                                                          \sigma_L\left(\sum_{j^{(1)}}^{N_{L-1}}\omega_{i
+                                                          j^{(1)}}^{(L)}y_{j^{(1)}}^{(L-1)}+\theta_{i}^{(L)}\right)\\
+\\
+&=&\displaystyle
+                                                          \sigma_L\left(\sum_{j^{(1)}=1}^{N_{L-1}}\omega_{i
+                                                          j^{(1)}}^{(L)}\sigma_{L-1}\left(\sum_{j^{(2)}=1}^{N_{L-2}}\omega_{j^{(1)}
+                                                          j^{(2)}}^{(L)}y_{j^{(2)}}^{(L-2)}+\theta_{j^{(1)}}^{(L-1)}\right)+\theta_{i}^{(L)}\right)\\
+&=&\dots
+\end{array}
+\end{equation}
+
+We want to compute the following derivatives:
+\begin{equation}
+\frac{\partial \chi^2}{\partial \omega_{ij}^{(\ell)}} =
+2\left(\frac{\mathbf{C}\otimes\mathbf{N}-F}{\sigma^2}\right)
+\mathbf{C}\otimes \frac{\partial \mathbf{N}}{\partial
+  \omega_{ij}^{(\ell)}}\,,
+\label{eq:deromega}
+\end{equation}
+and:
+\begin{equation}
+\frac{\partial \chi^2}{\partial \theta_{i}^{(\ell)}} =
+2\left(\frac{\mathbf{C}\otimes\mathbf{N}-F}{\sigma^2}\right)
+\mathbf{C}\otimes \frac{\partial \mathbf{N}}{\partial
+  \theta_{i}^{(\ell)}}\,.
+\label{eq:dertheta}
+\end{equation}
+Let us first focus on Eq.~(\ref{eq:deromega}). We define:
+\begin{equation}
+\begin{array}{l}
+  \displaystyle x_i^{(\ell)} =
+  \sum_{j=1}^{N_{\ell-1}}\omega_{ij}^{(\ell)}y_{j}^{(\ell-1)}+\theta_{i}^{(\ell)}\,,\\
+  \\
+  \displaystyle y_i^{(\ell)} =
+  \sigma_\ell\left(x_i^{(\ell)}\right)\,,\\
+  \\
+  \displaystyle z_i^{(\ell)} = \sigma'_\ell\left(x_i^{(\ell)}\right)\,,
+\end{array}
+\end{equation}
+so that we can apply the chain rule:
+\begin{equation}
+\begin{array}{rcl}
+\displaystyle  \frac{\partial N_k}{\partial \omega_{ij}^{(\ell)}}&=&\displaystyle\frac{\partial
+    y_k^{(L)}}{\partial \omega_{ij}^{(\ell)}}\\
+\\
+&=&\displaystyle z_k^{(L)}
+  \frac{\partial x_k^{(L)}}{\partial \omega_{ij}^{(\ell)}}\\
+\\
+&=&\displaystyle  \sum_{j^{(1)}=1}^{N_{L-1}}  \left[z_k^{(L)}\omega_{k j^{(1)}}^{(L)}\right]\frac{\partial
+    y_{j^{(1)}}^{(L-1)}}{\partial \omega_{ij}^{(\ell)}}\\
+\\
+&=&\displaystyle  \sum_{j^{(1)}=1}^{N_{L-1}} \sum_{j^{(2)}=1}^{N_{L-2}} \left[z_k^{(L)} \omega_{k j^{(1)}}^{(L)}
+  \right]\left[z_{j^{(1)}}^{(L-1)}\omega_{j^{(1)} j^{(2)}}^{(L-1)}\right]\frac{\partial
+    y_{j^{(2)}}^{(L-2)}}{\partial \omega_{ij}^{(\ell)}}\\
+\\
+&=&\displaystyle \dots
+\end{array}
+\end{equation}
+As evident, the chain rule penetrates into the neural network starting
+from the output layer all the way back until the $\ell$-th layer (that
+is, the layer where the parameter $\omega_{ij}^{(\ell)}$ with respect
+to which we are deriving belongs to). In order to write the formula we
+are looking for in a closed form we define:
+\begin{equation}
+z_i^{(\ell)}\omega_{ij}^{(\ell)}=S_{ij}^{(\ell)} \left(= \frac{\partial y_i^{(\ell)}}{\partial
+  y_j^{(\ell-1)}}\right) \,,
+\end{equation}
+and using the matricial form we can write:
+\begin{equation}
+\frac{\partial \mathbf{N}}{\partial \omega_{ij}^{(\ell)}} =
+\mathbf{S}^{(L)}\cdot \mathbf{S}^{(L-1)}\cdots
+\mathbf{S}^{(\ell+1)}\cdot\frac{\partial \mathbf{y}^{(\ell)}}{\partial
+\omega_{ij}^{(\ell)}}\,,
+\end{equation}
+that can be written in a more compact form as:
+\begin{equation}
+\frac{\partial \mathbf{N}}{\partial \omega_{ij}^{(\ell)}} =
+\left[\prod_{\alpha=L}^{\ell+1}\mathbf{S}^{(\alpha)}\right]\cdot\frac{\partial \mathbf{y}^{(\ell)}}{\partial
+\omega_{ij}^{(\ell)}}\,.
+\end{equation}
+In addition, the derivative in the r.h.s. can be computed explicitly
+and reads:
+\begin{equation}
+\frac{\partial y_k^{(\ell)}}{\partial
+\omega_{ij}^{(\ell)}} = z_k^{(\ell)} \frac{\partial x_k^{(\ell)}}{\partial
+\omega_{ij}^{(\ell)}} = \delta_{ki} z_i^{(\ell)}y_j^{(\ell-1)}\,.
+\label{eq:dydom}
+\end{equation}
+It is simple to see that the derivative in Eq.~(\ref{eq:dertheta})
+takes the form:
+\begin{equation}
+\frac{\partial \mathbf{N}}{\partial \theta_{i}^{(\ell)}} =
+\left[\prod_{\alpha=L}^{\ell+1}\mathbf{S}^{(\alpha)}\right]\cdot\frac{\partial \mathbf{y}^{(\ell)}}{\partial
+\theta_{i}^{(\ell)}}\,,
+\end{equation}
+with:
+\begin{equation}
+\frac{\partial y_k^{(\ell)}}{\partial
+\theta_{i}^{(\ell)}} = \delta_{ki}z_i^{(\ell)}\,.
+\label{eq:dydth}
+\end{equation}
+The presence of $\delta_{ki}$ in both Eqs.~(\ref{eq:dydom})
+and~(\ref{eq:dydth}) simplifies the computation of the derivatives
+yielding:
+\begin{equation}
+\frac{\partial N_k}{\partial \theta_{i}^{(\ell)}} =
+{\Sigma}_{ki}^{(\ell)}
+z_i^{(\ell)}\qquad\mbox{and}\qquad
+\frac{\partial N_k}{\partial \omega_{ij}^{(\ell)}} ={\Sigma}_{ki}^{(\ell)}
+z_i^{(\ell)} y_j^{(\ell-1)}\,.
+\end{equation}
+In both cases, the key quantities to be computes are the matrices:
+\begin{equation}
+\mathbf{\Sigma}^{(\ell)} = \prod_{\alpha=L}^{\ell+1}\mathbf{S}^{(\alpha)}\,,
+\end{equation}
+that can be computed recursively moving backward from the output layer
+as:
+\begin{equation}
+\mathbf{\Sigma}^{(\ell-1)} = \mathbf{\Sigma}^{(\ell)} \cdot \mathbf{S}^{(\ell)}\,,
+\end{equation}
+starting from:
+\begin{equation}
+\mathbf{\Sigma}^{(L)} = \mathbf{I}\,.
+\end{equation}
+
+The same technology can be used to compute derivatives of the neural
+network w.r.t. the input variables $\{\xi_p\}$. Indeed, a
+straightforward application of the chain rule discussed above produces
+the compact resul:
+\begin{equation}
+\frac{\partial \mathbf{N}}{\partial {\bm \xi}} = \prod_{\alpha=L}^{1}\mathbf{S}^{(\alpha)}=\mathbf{\Sigma}^{(0)}\,,
+\end{equation}
+or, making, the indices explicit:
+\begin{equation}
+\frac{\partial N_k}{\partial \xi_p} = \Sigma_{kp}^{(0)}\,.
+\end{equation}
+
+
+\end{document}

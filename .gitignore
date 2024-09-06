@@ -43,6 +43,6 @@ build/
 
 # Documentation
 doc/html
-
-# Executables of the test programs
-tests/TestDerivatives
+*.aux
+*.log
+*.pdf
