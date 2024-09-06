@@ -149,7 +149,7 @@ namespace nnad
           // Check that the number of outputs of the preprocessing
           // function is the same as that of the NN.
           if ((int) OutPrep.size() != ( _NpPrep + 1 ) * _Arch.back())
-            Error("FeedForwardNN: preprocessing function not well-formed.");
+            Error("FeedForwardNN: Preprocessing function not well-formed.");
         }
 
       // Report NN parameters
@@ -242,7 +242,7 @@ namespace nnad
       // number of parameters of the current NN plus the number of
       // parameters of the preprocessing function.
       if ((int) Pars.size() != _Np + _NpPrep)
-        Error("SetParameters: the number of parameters does not match that of the NN plus that of the preprocessing function.");
+        Error("SetParameters: The number of parameters does not match that of the NN plus that of the preprocessing function.");
 
       // Set links and biases
       for (int ip = 0; ip < _Np; ip++)
@@ -264,7 +264,7 @@ namespace nnad
     {
       // Check that the index "ip" is within the allowed bounds
       if (ip < 0 || ip >= _Np + _NpPrep)
-        Error("SetParameter: index 'ip' out of range.");
+        Error("SetParameter: Index 'ip' out of range.");
 
       // If ip < _Np the parameter corresponds to a NN parameter...
       if (ip < _Np)
@@ -312,7 +312,7 @@ namespace nnad
       // Check that the size of the parameter vector is equal to the
       // number of parameters of the preprocessing function.
       if ((int) ProprocPars.size() != _NpPrep)
-        Error("SetPreprocessingParameters: the number of parameters does not match that of the preprocessing function.");
+        Error("SetPreprocessingParameters: The number of parameters does not match that of the preprocessing function.");
 
       // Set parameters
       _PreprocPars = ProprocPars;
@@ -486,7 +486,7 @@ namespace nnad
       // Check that the size of the input vector is equal to the number of
       // input nodes.
       if ((int) Input.size() != _Arch[0])
-        Error("Evaluate: the number of inputs does not match the number of input nodes.");
+        Error("Evaluate: The number of inputs does not match the number of input nodes.");
 
       // Number of layers
       const int nl = (int) _Arch.size();
@@ -514,7 +514,7 @@ namespace nnad
       // Check that the size of the input vector is equal to the number of
       // input nodes.
       if ((int) Input.size() != _Arch[0])
-        Error("Derive: the number of inputs does not match the number of input nodes.");
+        Error("Derive: The number of inputs does not match the number of input nodes.");
 
       // Initialise dNN vector
       std::vector<T> dNN((_Np + 1) * _Arch.back());
@@ -609,6 +609,62 @@ namespace nnad
             std::transform(dNN.begin() + Nout * ip, dNN.begin() + Nout * ( ip + 1 ), prep.begin() + Nout * ( ip - _Np ), dNN.begin() + Nout * ip, std::multiplies<T>());
         }
       return dNN;
+    }
+
+    //_________________________________________________________________________________
+    Matrix<T> EvaluatePrime(std::vector<T> const& Input) const
+    {
+      // Preprocessing not allowed yet
+      if (_Preproc != nullptr)
+        Error("EvaluatePrime: Preprocessing function not yet allowed for the computation of the NN w.r.t. the input variables.");
+
+      // Check that the size of the input vector is equal to the number of
+      // input nodes.
+      if ((int) Input.size() != _Arch[0])
+        Error("EvaluatePrime: The number of inputs does not match the number of input nodes.");
+
+      // Number of layers
+      const int nl = (int) _Arch.size();
+
+      // Compute NN recursively and save the quantities that will be
+      // needed to compute the derivatives.
+      std::map<int, Matrix<T>> y;
+      std::map<int, Matrix<T>> z;
+      y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
+      for (int l = 1; l < nl - 1; l++)
+        {
+          const Matrix<T> M = _Links.at(l) * y.at(l - 1) + _Biases.at(l);
+          y.insert({l, Matrix<T>{M, _ActFun}});
+          z.insert({l, Matrix<T>{M, _dActFun}});
+        }
+
+      // Now take care of the output layer according to the selected
+      // output function.
+      const Matrix<T> M = _Links.at(nl - 1) * y.at(nl - 2) + _Biases.at(nl - 1);
+      y.insert({nl - 1, Matrix<T>{M, _OutputActFun}});
+      z.insert({nl - 1, Matrix<T>{M, _dOutputActFun}});
+
+      // Compute the Sigma matrix on the output layer that is just the
+      // unity matrix.
+      Matrix<T> Sigma(_Arch[nl - 1], _Arch[nl - 1], std::vector<T>(_Arch[nl - 1] * _Arch[nl - 1], T(0.)));
+      for (int k = 0; k < _Arch[nl - 1]; k++)
+        Sigma.SetElement(k, k, T(1));
+
+      // Now run backwards on the layers to compute the Sigma^{(0)}
+      for (int l = nl - 1; l > 0; l--)
+        {
+          // Compute Matrix "S" on this layer
+          const std::vector<T> zl = z.at(l).GetVector();
+          std::vector<T> entries;
+          for (int i = 0; i < _Arch[l]; i++)
+            for (int j = 0; j < _Arch[l - 1]; j++)
+              entries.push_back(zl[i] * _Links.at(l).GetElement(i, j));
+          const Matrix<T> S{_Arch[l], _Arch[l - 1], entries};
+
+          // Update Matrix "Sigma" for the next step
+          Sigma = Sigma * S;
+        }
+      return Sigma;
     }
 
   private:
