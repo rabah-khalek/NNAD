@@ -77,12 +77,27 @@ namespace nnad
     }
 
     //_________________________________________________________________________________
+    Matrix(Matrix const& x, Matrix<std::function<T(T const&)>> f):
+      _Lines(x.GetLines()),
+      _Columns(x.GetColumns()),
+      _Matrix(_Lines * _Columns)
+    {
+      const std::vector<T> xv = x.GetVector();
+      for (int i = 0; i < _Lines; i++)
+        for (int j = 0; j < _Columns; j++)
+          {
+            const int k = GetLinearIndex(i, j);
+            _Matrix[k] = f.GetElement(i, j)(xv[k]);
+          }
+    }
+
+    //_________________________________________________________________________________
     void Transpose()
     {
       std::vector<T> new_Matrix(_Columns * _Lines);
       for (int i = 0; i < _Lines; i++)
         for (int j = 0; j < _Columns; j++)
-          new_Matrix[j*_Lines + i] = _Matrix[i * _Columns + j];
+          new_Matrix[j * _Lines + i] = _Matrix[i * _Columns + j];
 
       const int temp = _Lines;
       _Lines   = _Columns;
@@ -107,7 +122,7 @@ namespace nnad
           // are not in given row and column.
           if (row != p && col != q)
             {
-              output.SetElement(i,j++,  this->GetElement(row,col));
+              output.SetElement(i, j++, this->GetElement(row, col));
 
               // Row is filled, so increase row index and reset col
               // index.
@@ -131,7 +146,7 @@ namespace nnad
 
       //  Base case : if matrix contains single element
       if (_Lines == 1)
-        return this->GetElement(0,0);
+        return this->GetElement(0, 0);
 
       // To store sign multiplier
       int sign = 1;
@@ -202,7 +217,7 @@ namespace nnad
       // Find Inverse using formula "inverse = adj/det"
       for (int i = 0; i < _Lines; i++)
         for (int j = 0; j < _Columns; j++)
-          output.SetElement(i,j, adj.GetElement(i,j) / T{det});
+          output.SetElement(i, j, adj.GetElement(i, j) / T{det});
 
       return output;
     }
@@ -243,6 +258,18 @@ namespace nnad
         Error("SetElement: column index out of range.");
 
       _Matrix[i * _Columns + j] = value;
+    }
+
+    //_________________________________________________________________________________
+    int GetLinearIndex(int const& i, int const& j) const
+    {
+      if (i < 0 || i > _Lines)
+        Error("GetLinearIndex: line index out of range.");
+
+      if (j < 0 || j > _Columns)
+        Error("GetLinearIndex: column index out of range.");
+
+      return i * _Columns + j;
     }
 
     //_________________________________________________________________________________
@@ -421,15 +448,15 @@ namespace nnad
       for (int i = 0; i < _Lines; i++)
         {
           for (int j = 0; j < _Columns; j++)
-            std::cout << this->GetElement(i,j) << " ";
+            std::cout << this->GetElement(i, j) << " ";
           std::cout << std::endl;
         }
       std::cout << std::endl;
     }
 
   private:
-    int _Lines;
-    int _Columns;
+    int            _Lines;
+    int            _Columns;
     std::vector<T> _Matrix;
   };
 }

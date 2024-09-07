@@ -16,7 +16,7 @@ int main()
   nnad::FeedForwardNN<double> nn{arch, 0, nnad::OutputFunction::QUADRATIC, true};
 
   // Set exponential link function
-  nn.SetLinkFunction(nnad::Exp<double>, nnad::dExp<double>);
+  nn.SetLinkFunctions(nnad::Exp<double>, nnad::dExp<double>);
 
   // Input vector
   const std::vector<double> x{0.1, 2.3, 4.5};
