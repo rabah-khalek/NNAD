@@ -719,11 +719,11 @@ namespace nnad
     std::vector<int>                            const _Arch;
     std::function<T(T const&)>                  const _ActFun;
     std::function<T(T const&)>                  const _dActFun;
+    std::function<T(T const&)>                        _OutputActFun;
+    std::function<T(T const&)>                        _dOutputActFun;
     Preprocessing                               const _Preproc;
     std::vector<T>                                    _PreprocPars;
     int                                         const _NpPrep;
-    std::function<T(T const&)>                        _OutputActFun;
-    std::function<T(T const&)>                        _dOutputActFun;
     std::map<int, Matrix<std::function<T(T const&)>>> _Fw;
     std::map<int, Matrix<std::function<T(T const&)>>> _dFw;
     int                                               _Np;
