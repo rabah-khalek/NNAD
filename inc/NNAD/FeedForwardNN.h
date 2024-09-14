@@ -580,7 +580,7 @@ namespace nnad
       y.insert({0, Matrix<T>{(int) Input.size(), 1, Input}});
       for (int l = 1; l < nl - 1; l++)
         {
-          const Matrix<T> M = Matrix<T> {_Links.at(l), _Fw.at(l)}  * y.at(l - 1) + _Biases.at(l);
+          const Matrix<T> M = Matrix<T> {_Links.at(l), _Fw.at(l)} * y.at(l - 1) + _Biases.at(l);
           y.insert({l, Matrix<T>{M, _ActFun}});
           z.insert({l, Matrix<T>{M, _dActFun}});
         }

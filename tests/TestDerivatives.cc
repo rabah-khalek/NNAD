@@ -13,10 +13,18 @@ int main()
   const std::vector<int> arch{3, 5, 5, 3};
 
   // Initialise NN
-  const nnad::FeedForwardNN<double> nn{arch, 0, nnad::OutputFunction::QUADRATIC, true};
+  nnad::FeedForwardNN<double> nn{arch, 0, nnad::OutputFunction::LINEAR, true};
 
   // Linear output NN needed for the numerical derivative
-  const nnad::FeedForwardNN<double> nnl{arch, 0, nnad::OutputFunction::LINEAR, false};
+  nnad::FeedForwardNN<double> nnl{arch, 0, nnad::OutputFunction::LINEAR, false};
+
+  // Define link function and it derivative
+  const std::function<double(double const&)> Fw  = nnad::Quadratic<double>;
+  const std::function<double(double const&)> dFw = nnad::dQuadratic<double>;
+
+  // Set link function
+  nn.SetLinkFunctions(Fw, dFw, {true, true, true});
+  nnl.SetLinkFunctions(Fw, dFw, {true, true, true});
 
   // Input vector
   std::vector<double> x{0.1, 2.3, 4.5};
@@ -55,8 +63,12 @@ int main()
         }
 
       // Define NNs with the displaced parameters.
-      const nnad::FeedForwardNN<double> nnp{arch, parsp};
-      const nnad::FeedForwardNN<double> nnm{arch, parsm};
+      nnad::FeedForwardNN<double> nnp{arch, parsp};
+      nnad::FeedForwardNN<double> nnm{arch, parsm};
+
+      // Set link function
+      nnp.SetLinkFunctions(Fw, dFw, {true, true, true});
+      nnm.SetLinkFunctions(Fw, dFw, {true, true, true});
 
       // Get outputs and compute the derivative numerically
       const std::vector<double> vp = nnp.Evaluate(x);
