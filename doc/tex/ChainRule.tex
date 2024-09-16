@@ -239,21 +239,33 @@ follows:
 \end{equation}
 
 An interesting application of this generalisation is obtained by
-setting $f(x)=e^{x}$. Indeed, upon this choice, one can show that,
-under the assumption of monotonically increasing activation functions,
-the resulting neural network is also an increasing monotonic function
-of \textit{all} of its input variables. However, given an arbitrary
-number of inputs, one may want to enforce monotonicity only on a
-subset of them, allowing the others to be non-monotonic. This goal is
-achieved by using $f(x)=x$, rather than $f(x)=e^{x}$, for those links
-associated with input nodes for which monotonicity is not
-required. More specifically, suppose one has a neural network with
-$N_0$ input nodes and $N_1$ nodes in the first hidden layer (the rest
-of the architecture is unimportant). Non-monotonicity on the $j$-th
-input variable is achieved by using the linear function $f(x)= x$ on
-the links $\omega _{ij}^{(1)}$, with $i=1,\dots, N_{1}$, \textit{i.e.}
-those links that connect the $j$-th node of the input layer with all
-nodes of the first hidden layer.
+setting $f(x)=e^{x}$~\cite{Zhang:1999}. Indeed, upon this choice, one
+can show that, under the assumption of monotonically increasing
+activation functions, the resulting neural network is also an
+increasing monotonic function of \textit{all} of its input
+variables. However, given an arbitrary number of inputs, one may want
+to enforce monotonicity only on a subset of them, allowing the others
+to be non-monotonic. This goal is achieved by using $f(x)=x$, rather
+than $f(x)=e^{x}$, for those links associated with input nodes for
+which monotonicity is not required. More specifically, suppose one has
+a neural network with $N_0$ input nodes and $N_1$ nodes in the first
+hidden layer (the rest of the architecture is
+unimportant). Non-monotonicity on the $j$-th input variable is
+achieved by using the linear function $f(x)= x$ on the links
+$\omega _{ij}^{(1)}$, with $i=1,\dots, N_{1}$, \textit{i.e.}  those
+links that connect the $j$-th node of the input layer with all nodes
+of the first hidden layer.
+
+\begin{thebibliography}{alp}
+
+\bibitem{Zhang:1999}
+  Zhang, H. \& Zhang, Z. 
+  Feedforward networks with monotone constraints. 
+  {\em IJCNN'99. International Joint Conference On Neural
+    Networks. Proceedings (Cat. No.99CH36339)}.
+  \textbf{3} pp. 1820-1823 vol.3 (1999)
+
+\end{thebibliography}
 
 
 \end{document}
